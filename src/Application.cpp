@@ -9,6 +9,8 @@
 
 #include "Camera.h"
 #include "Shader.h"			// includes glad/glad.h
+#include "stb_image.h"
+
 #include <GLFW/glfw3.h>
 // RUN THIS ON X64
 // This is a test change
