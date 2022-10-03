@@ -19,7 +19,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void renderCube();	unsigned int cubeVAO = 0, cubeVBO = 0;
-
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 int SRC_WIDTH = 1600;
 int SRC_HEIGHT = 900;
 
@@ -27,7 +27,7 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 // Camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 7.0f));
 float lastX = SRC_WIDTH / 2, lastY = SRC_HEIGHT / 2;
 bool bFirstMouse = true;
 
@@ -46,6 +46,8 @@ int main(void)
 
 	// Create a GLFWwindow object of 800 by 800 pixels, naming it "YoutubeOpenGL"
 	GLFWwindow* window = glfwCreateWindow(SRC_WIDTH, SRC_HEIGHT, "ImGui + GLFW", NULL, NULL);
+	// Introduce the window into the current context
+	glfwMakeContextCurrent(window);
 	// Error check if the window fails to create
 	if (window == NULL)
 	{
@@ -53,8 +55,13 @@ int main(void)
 		glfwTerminate();
 		return -1;
 	}
-	// Introduce the window into the current context
-	glfwMakeContextCurrent(window);
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
+	
+	// tell GLFW to capture our mouse
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 
 	//Load GLAD so it configures OpenGL
 	gladLoadGL();
@@ -75,7 +82,7 @@ int main(void)
 	float size = 1.0f;
 	float color[4] = { 0.8f, 0.3f, 0.02f, 1.0f };
 
-	
+	Shader unlit("src/shaders/unlit/unlit.vert", "src/shaders/unlit/unlit.frag");
 
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
@@ -85,6 +92,7 @@ int main(void)
 		// Clean the back buffer and assign the new color to it
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		processInput(window);
 		// Tell OpenGL a new frame is about to begin
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
@@ -109,6 +117,11 @@ int main(void)
 		glm::mat4 model = glm::mat4(1.0f);
 
 		// use shader
+		unlit.use();
+		unlit.setMat4("projection", projection);
+		unlit.setMat4("view", view);
+		unlit.setMat4("model", model);
+
 		// set matrice information in shader
 		renderCube();
 
@@ -142,13 +155,15 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	SRC_WIDTH = width;
 	SRC_HEIGHT = height;
 }
-
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	camera.ProcessMouseScroll(static_cast<float>(yoffset));
+}
 void processInput(GLFWwindow* window)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 
-	const float cameraSpeed = 2.5 * deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		camera.ProcessKeyboard(FORWARD, deltaTime);
 
@@ -189,10 +204,6 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 
 }
 
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-	camera.ProcessMouseScroll(static_cast<float>(yoffset));
-}
 
 void renderCube()
 {

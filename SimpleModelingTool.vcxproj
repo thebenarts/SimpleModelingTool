@@ -188,6 +188,10 @@
     <ClInclude Include="src\vendor\imgui\include\imstb_textedit.h" />
     <ClInclude Include="src\vendor\imgui\include\imstb_truetype.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="src\shaders\unlit\unlit.frag" />
+    <None Include="src\shaders\unlit\unlit.vert" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

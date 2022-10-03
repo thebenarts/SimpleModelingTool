@@ -84,4 +84,8 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="src\shaders\unlit\unlit.vert" />
+    <None Include="src\shaders\unlit\unlit.frag" />
+  </ItemGroup>
 </Project>
