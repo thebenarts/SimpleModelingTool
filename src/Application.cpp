@@ -5,6 +5,8 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+// RUN THIS ON X64
+// This is a test change
 
 // Vertex Shader source code
 const char* vertexShaderSource = "#version 330 core\n"
