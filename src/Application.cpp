@@ -30,7 +30,8 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 // Camera
-Camera camera(glm::vec3(0.0f, 0.0f, 7.0f));
+//Camera camera(glm::vec3(0.0, 0.0, 3.0));
+Camera camera(glm::vec3(-4.4f, 3.1f, 4.6f), glm::vec3(0.0f, 1.0f, 0.0f), -46.f, -26.5f);
 float lastX = (float)SRC_WIDTH / 2.f, lastY = (float)SRC_HEIGHT / 2.f;
 bool bFirstMouse = true;
 bool bViewPortActive = true;
@@ -100,6 +101,9 @@ int main(void)
 	ImGui_ImplOpenGL3_Init("#version 330");
 
 	glEnable(GL_DEPTH_TEST);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
 
 	// Variables to be changed in the ImGUI window
@@ -116,6 +120,7 @@ int main(void)
 	// Directional light shader
 	Shader dirLight("src/shaders/DirLight/dirLight.vert", "src/shaders/DirLight/dirLight.frag");
 	Shader visNormals("src/shaders/visualizeNormals/visualizeNormals.vert", "src/shaders/visualizeNormals/visualizeNormals.frag", "src/shaders/visualizeNormals/visualizeNormals.geom");
+	Shader guideGrid("src/shaders/grid/gridGuide.vert", "src/shaders/grid/gridGuide.frag");
 
 	std::vector<std::string> shapes{ "PLANE", "CUBE", "SPHERE" };
 
@@ -161,6 +166,7 @@ int main(void)
 
 		ImGui::End();
 
+
 		{
 			ImGui::Begin("AddPrimitiveShapes");
 			if (ImGui::TreeNode("Shapes"))
@@ -186,12 +192,13 @@ int main(void)
 		glm::mat4 view = camera.GetViewMatrix();
 		glm::mat4 model = glm::mat4(1.0f);
 
-		model = glm::translate(model, glm::vec3(location[0],location[1], location[2]));
-		model = glm::scale(model, glm::vec3(scale[0], scale[1],scale[2]));
-		model = glm::rotate(model, glm::radians(rotation[0]), glm::vec3(1,0,0));
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(location[0], location[1], location[2]));
+		model = glm::scale(model, glm::vec3(scale[0], scale[1], scale[2]));
+		model = glm::rotate(model, glm::radians(rotation[0]), glm::vec3(1, 0, 0));
 		model = glm::rotate(model, glm::radians(rotation[1]), glm::vec3(0, 1, 0));
 		model = glm::rotate(model, glm::radians(rotation[2]), glm::vec3(0, 0, 1));
-		
+
 		// use shader
 		unlit.use();
 		unlit.setMat4("projection", projection);
@@ -232,6 +239,12 @@ int main(void)
 			renderShape();
 		}
 
+		guideGrid.use();
+		guideGrid.setMat4("projection", projection);
+		guideGrid.setMat4("view", view);
+		renderPlane();
+	
+
 		// Renders the ImGUI elements
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -241,6 +254,8 @@ int main(void)
 		// Take care of all GLFW events
 		glfwPollEvents();
 	}
+
+
 
 	// Deletes all ImGUI instances
 	ImGui_ImplOpenGL3_Shutdown();

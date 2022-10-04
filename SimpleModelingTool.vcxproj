@@ -191,6 +191,8 @@
   <ItemGroup>
     <None Include="src\shaders\DirLight\dirLight.vert" />
     <None Include="src\shaders\DirLight\dirLight.frag" />
+    <None Include="src\shaders\grid\gridGuide.frag" />
+    <None Include="src\shaders\grid\gridGuide.vert" />
     <None Include="src\shaders\unlit\unlit.frag" />
     <None Include="src\shaders\unlit\unlit.vert" />
     <None Include="src\shaders\visualizeNormals\visualizeNormals.frag" />
