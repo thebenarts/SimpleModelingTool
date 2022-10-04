@@ -109,7 +109,7 @@ int main(void)
 	//TODO : encapsualte geometry data
 	float scale[3] = { 1.0,1.0,1.0 };
 	float rotation[3] = { 0.0,0.0,0.0 };
-	float lightDirection[3] = { -2.2, -4.0, -3.3 };
+	//float lightDirection[3] = { -2.2, -4.0, -3.3 };
 
 	Shader unlit("src/shaders/unlit/unlit.vert", "src/shaders/unlit/unlit.frag");
 	// Directional light shader
@@ -141,8 +141,8 @@ int main(void)
 		ImGui::Text("Hello there adventurer!");
 		// Checkbox that appears in the window
 		ImGui::Checkbox("DirLight Toggle", &bDirLightToggle);
-		// Lighd Direction
-		ImGui::DragFloat3("Light Direction", lightDirection);
+		// Light Direction
+		//ImGui::DragFloat3("Light Direction", lightDirection);
 		// Slider that appears in the window
 		ImGui::SliderFloat("Size", &size, 0.5f, 2.0f);
 		// Fancy color editor that appears in the window
@@ -199,7 +199,9 @@ int main(void)
 		if(bDirLightToggle){
 			//lightshade
 			dirLight.use();
-			dirLight.setVec3("light.direction", glm::vec3(lightDirection[0], lightDirection[1], lightDirection[2]));
+			//dirLight.setVec3("light.direction", glm::vec3(lightDirection[0], lightDirection[1], lightDirection[2]));
+			// I AM THE DIRLIGHT
+			dirLight.setVec3("light.direction", glm::vec3(camera.Front));
 			dirLight.setVec3("viewPos", camera.Position);
 		
 			//light properties
@@ -214,7 +216,7 @@ int main(void)
 
 		// set matrice information in shader
 
-		renderShape();
+		renderCube();
 
 		// Renders the ImGUI elements
 		ImGui::Render();
