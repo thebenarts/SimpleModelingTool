@@ -18,7 +18,10 @@
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void renderShape();
+void renderPlane(); unsigned int planeVBO = 0, planeVAO = 0;
 void renderCube();	unsigned int cubeVAO = 0, cubeVBO = 0;
+void renderSphere();
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 int SRC_WIDTH = 1600;
 int SRC_HEIGHT = 900;
@@ -31,6 +34,7 @@ Camera camera(glm::vec3(0.0f, 0.0f, 7.0f));
 float lastX = (float)SRC_WIDTH / 2.f, lastY = (float)SRC_HEIGHT / 2.f;
 bool bFirstMouse = true;
 bool bViewPortActive = true;
+int selectedShape = 0;
 
 int main(void)
 {
@@ -92,6 +96,8 @@ int main(void)
 
 	Shader unlit("src/shaders/unlit/unlit.vert", "src/shaders/unlit/unlit.frag");
 
+	std::vector<std::string> shapes{ "PLANE", "CUBE", "SPHERE" };
+
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -109,10 +115,6 @@ int main(void)
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-
-		ImGui::ShowDemoWindow();
-
-
 
 		// ImGUI window creation
 		ImGui::Begin("ToolBar");
@@ -134,6 +136,26 @@ int main(void)
 
 		ImGui::End();
 
+		{
+			ImGui::Begin("AddPrimitiveShapes");
+			if (ImGui::TreeNode("Shapes"))
+			{
+				for (int i = 0; i != 3; i++)
+				{
+					ImGui::PushID(i);
+					const char* selID = shapes[i].c_str();
+					if (ImGui::Selectable(selID))
+					{
+						selectedShape = i;
+						std::cout << selectedShape << std::endl;
+					}
+
+					ImGui::PopID();
+				}
+				ImGui::TreePop();
+			}
+			ImGui::End();
+		}
 
 		glm::mat4 projection = glm::perspective(glm::radians(camera.FieldOfView), (float)SRC_WIDTH / (float)SRC_HEIGHT, 0.1f, 100.f);
 		glm::mat4 view = camera.GetViewMatrix();
@@ -152,7 +174,8 @@ int main(void)
 		unlit.setMat4("model", model);
 
 		// set matrice information in shader
-		renderCube();
+
+		renderShape();
 
 		// Renders the ImGUI elements
 		ImGui::Render();
@@ -249,6 +272,58 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 	}
 }
 
+void renderShape()
+{
+	switch (selectedShape)
+	{
+	case 0:
+		renderPlane();
+		break;
+	case 1: 
+		renderCube();
+		break;
+	case 2:
+		renderSphere();
+		break;
+	default:
+		renderPlane();
+		break;
+	}
+}
+
+void renderPlane()
+{
+	if (planeVAO == 0)
+	{
+		float quadVertices[] = {   // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+	   // positions   // texCoords
+	   -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
+	   -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
+		1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
+
+	   -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
+		1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		1.0f,  1.0f, 0.0f, 1.0f, 1.0f
+		};
+		glGenVertexArrays(1, &planeVAO);
+		glGenBuffers(1, &planeVBO);
+		// fill buffer
+		glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+		// link vertex attributes
+		glBindVertexArray(planeVAO);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+		glBindVertexArray(0);
+	}
+	// render Cube
+	glBindVertexArray(planeVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glBindVertexArray(0);
+}
 
 void renderCube()
 {
@@ -319,4 +394,99 @@ void renderCube()
 	glBindVertexArray(cubeVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
+}
+
+unsigned int sphereVAO = 0;
+unsigned int indexCount;
+void renderSphere()
+{
+	if (sphereVAO == 0)
+	{
+		glGenVertexArrays(1, &sphereVAO);
+
+		unsigned int vbo, ebo;
+		glGenBuffers(1, &vbo);
+		glGenBuffers(1, &ebo);
+
+		std::vector<glm::vec3> positions;
+		std::vector<glm::vec2> uv;
+		std::vector<glm::vec3> normals;
+		std::vector<unsigned int> indices;
+
+		const unsigned int X_SEGMENTS = 64;
+		const unsigned int Y_SEGMENTS = 64;
+		const float PI = 3.14159265359f;
+		for (unsigned int x = 0; x <= X_SEGMENTS; ++x)
+		{
+			for (unsigned int y = 0; y <= Y_SEGMENTS; ++y)
+			{
+				float xSegment = (float)x / (float)X_SEGMENTS;
+				float ySegment = (float)y / (float)Y_SEGMENTS;
+				float xPos = std::cos(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
+				float yPos = std::cos(ySegment * PI);
+				float zPos = std::sin(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
+
+				positions.push_back(glm::vec3(xPos, yPos, zPos));
+				uv.push_back(glm::vec2(xSegment, ySegment));
+				normals.push_back(glm::vec3(xPos, yPos, zPos));
+			}
+		}
+
+		bool oddRow = false;
+		for (unsigned int y = 0; y < Y_SEGMENTS; ++y)
+		{
+			if (!oddRow) // even rows: y == 0, y == 2; and so on
+			{
+				for (unsigned int x = 0; x <= X_SEGMENTS; ++x)
+				{
+					indices.push_back(y * (X_SEGMENTS + 1) + x);
+					indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
+				}
+			}
+			else
+			{
+				for (int x = X_SEGMENTS; x >= 0; --x)
+				{
+					indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
+					indices.push_back(y * (X_SEGMENTS + 1) + x);
+				}
+			}
+			oddRow = !oddRow;
+		}
+		indexCount = static_cast<unsigned int>(indices.size());
+
+		std::vector<float> data;
+		for (unsigned int i = 0; i < positions.size(); ++i)
+		{
+			data.push_back(positions[i].x);
+			data.push_back(positions[i].y);
+			data.push_back(positions[i].z);
+			if (normals.size() > 0)
+			{
+				data.push_back(normals[i].x);
+				data.push_back(normals[i].y);
+				data.push_back(normals[i].z);
+			}
+			if (uv.size() > 0)
+			{
+				data.push_back(uv[i].x);
+				data.push_back(uv[i].y);
+			}
+		}
+		glBindVertexArray(sphereVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), &data[0], GL_STATIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+		unsigned int stride = (3 + 2 + 3) * sizeof(float);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void*)(6 * sizeof(float)));
+	}
+
+	glBindVertexArray(sphereVAO);
+	glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, 0);
 }
