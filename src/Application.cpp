@@ -34,7 +34,7 @@ Camera camera(glm::vec3(0.0f, 0.0f, 7.0f));
 float lastX = (float)SRC_WIDTH / 2.f, lastY = (float)SRC_HEIGHT / 2.f;
 bool bFirstMouse = true;
 bool bViewPortActive = true;
-int selectedShape = 0;
+int selectedShape = 1;
 
 float location[3] = { 0.0,0.0,0.0 };
 
@@ -104,6 +104,7 @@ int main(void)
 
 	// Variables to be changed in the ImGUI window
 	bool bDirLightToggle = true;
+	bool bVertexNormalToggle = true;
 	float size = 1.0f;
 	float color[4] = { 0.8f, 0.3f, 0.02f, 1.0f };
 	//TODO : encapsualte geometry data
@@ -114,6 +115,7 @@ int main(void)
 	Shader unlit("src/shaders/unlit/unlit.vert", "src/shaders/unlit/unlit.frag");
 	// Directional light shader
 	Shader dirLight("src/shaders/DirLight/dirLight.vert", "src/shaders/DirLight/dirLight.frag");
+	Shader visNormals("src/shaders/visualizeNormals/visualizeNormals.vert", "src/shaders/visualizeNormals/visualizeNormals.frag", "src/shaders/visualizeNormals/visualizeNormals.geom");
 
 	std::vector<std::string> shapes{ "PLANE", "CUBE", "SPHERE" };
 
@@ -141,6 +143,8 @@ int main(void)
 		ImGui::Text("Hello there adventurer!");
 		// Checkbox that appears in the window
 		ImGui::Checkbox("DirLight Toggle", &bDirLightToggle);
+		// visualize vertex normals
+		ImGui::Checkbox("VertexNormals Toggle", &bVertexNormalToggle);
 		// Lighd Direction
 		ImGui::DragFloat3("Light Direction", lightDirection);
 		// Slider that appears in the window
@@ -215,6 +219,16 @@ int main(void)
 		// set matrice information in shader
 
 		renderShape();
+
+		//--------------------------	vis Normals
+		if (bVertexNormalToggle)
+		{
+			visNormals.use();
+			visNormals.setMat4("view", view);
+			visNormals.setMat4("model", model);
+			visNormals.setMat4("projection", projection);
+			renderShape();
+		}
 
 		// Renders the ImGUI elements
 		ImGui::Render();
@@ -352,7 +366,7 @@ void renderShape()
 		renderSphere();
 		break;
 	default:
-		renderPlane();
+		renderCube();
 		break;
 	}
 }
