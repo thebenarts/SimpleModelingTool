@@ -104,6 +104,9 @@ int main(void)
 	ImGui_ImplOpenGL3_Init("#version 330");
 
 	glEnable(GL_DEPTH_TEST);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
 
 	// Variables to be changed in the ImGUI window
@@ -120,6 +123,7 @@ int main(void)
 	// Directional light shader
 	Shader dirLight("src/shaders/DirLight/dirLight.vert", "src/shaders/DirLight/dirLight.frag");
 	Shader visNormals("src/shaders/visualizeNormals/visualizeNormals.vert", "src/shaders/visualizeNormals/visualizeNormals.frag", "src/shaders/visualizeNormals/visualizeNormals.geom");
+	Shader guideGrid("src/shaders/grid/gridGuide.vert", "src/shaders/grid/gridGuide.frag");
 
 	std::vector<std::string> shapes{ "PLANE", "CUBE", "SPHERE" };
 
@@ -140,8 +144,6 @@ int main(void)
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-
-		ImGui::ShowDemoWindow();
 
 		// ImGUI window creation
 		ImGui::Begin("ToolBar");
@@ -192,9 +194,10 @@ int main(void)
 		glm::mat4 view = camera.GetViewMatrix();
 		glm::mat4 model = glm::mat4(1.0f);
 
-		model = glm::translate(model, glm::vec3(location[0],location[1], location[2]));
-		model = glm::scale(model, glm::vec3(scale[0], scale[1],scale[2]));
-		model = glm::rotate(model, glm::radians(rotation[0]), glm::vec3(1,0,0));
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(location[0], location[1], location[2]));
+		model = glm::scale(model, glm::vec3(scale[0], scale[1], scale[2]));
+		model = glm::rotate(model, glm::radians(rotation[0]), glm::vec3(1, 0, 0));
 		model = glm::rotate(model, glm::radians(rotation[1]), glm::vec3(0, 1, 0));
 		model = glm::rotate(model, glm::radians(rotation[2]), glm::vec3(0, 0, 1));
 
@@ -238,6 +241,12 @@ int main(void)
 			renderShape();
 		}
 
+		guideGrid.use();
+		guideGrid.setMat4("projection", projection);
+		guideGrid.setMat4("view", view);
+		renderPlane();
+	
+
 		// Renders the ImGUI elements
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -274,7 +283,10 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 }
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	if (key == GLFW_KEY_TAB && action == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, true);
+
+	if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS)
 	{
 		std::cout << "stop pressing me" << std::endl;
 		bViewPortActive = !bViewPortActive;

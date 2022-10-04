@@ -92,5 +92,7 @@
     <None Include="src\shaders\visualizeNormals\visualizeNormals.vert" />
     <None Include="src\shaders\visualizeNormals\visualizeNormals.frag" />
     <None Include="src\shaders\visualizeNormals\visualizeNormals.geom" />
+    <None Include="src\shaders\grid\gridGuide.vert" />
+    <None Include="src\shaders\grid\gridGuide.frag" />
   </ItemGroup>
 </Project>
