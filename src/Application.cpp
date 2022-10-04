@@ -36,6 +36,20 @@ bool bFirstMouse = true;
 bool bViewPortActive = true;
 int selectedShape = 0;
 
+float location[3] = { 0.0,0.0,0.0 };
+
+enum userState
+{
+	Normal,
+	Move,
+	Scale,
+	Rotate
+};
+
+float interactX = lastX;
+
+userState uState = Normal;
+
 int main(void)
 {
 	// Initialize GLFW
@@ -90,7 +104,6 @@ int main(void)
 	float size = 1.0f;
 	float color[4] = { 0.8f, 0.3f, 0.02f, 1.0f };
 	//TODO : encapsualte geometry data
-	float location[3] = { 0.0,0.0,0.0 };
 	float scale[3] = { 1.0,1.0,1.0 };
 	float rotation[3] = { 0.0,0.0,0.0 };
 
@@ -228,17 +241,36 @@ void processInput(GLFWwindow* window)
 	}
 	if (bViewPortActive)
 	{
-		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-			camera.ProcessKeyboard(FORWARD, deltaTime);
+		if (uState == Normal)
+		{
+			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+				camera.ProcessKeyboard(FORWARD, deltaTime);
 
-		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-			camera.ProcessKeyboard(BACKWARD, deltaTime);
+			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+				camera.ProcessKeyboard(BACKWARD, deltaTime);
 
-		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-			camera.ProcessKeyboard(LEFT, deltaTime);
+			if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+				camera.ProcessKeyboard(LEFT, deltaTime);
 
-		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-			camera.ProcessKeyboard(RIGHT, deltaTime);
+			if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+				camera.ProcessKeyboard(RIGHT, deltaTime);
+
+			if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
+			{
+				uState = Move;
+				interactX = lastX;
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			}
+		}
+
+		if (uState == Move)
+		{
+			if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS)
+			{
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+				uState = Normal;
+			}
+		}
 	}
 	
 }
@@ -250,25 +282,32 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 	// 3	add some constraints to the min/max pitch values.
 	// 4	calculate the direction vector
 
-	if (bViewPortActive)
+	float xpos = static_cast<float>(xposIn);
+	float ypos = static_cast<float>(yposIn);
+
+	if (bFirstMouse)
 	{
-		float xpos = static_cast<float>(xposIn);
-		float ypos = static_cast<float>(yposIn);
-
-		if (bFirstMouse)
-		{
-			lastX = xpos;
-			lastY = ypos;
-			bFirstMouse = false;
-		}
-
-		float xoffset = xpos - lastX;
-		float yoffset = lastY - ypos;		// reversed since y-coordinates go from bottom to top
-
 		lastX = xpos;
 		lastY = ypos;
+		bFirstMouse = false;
+	}
 
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos;		// reversed since y-coordinates go from bottom to top
+
+	lastX = xpos;
+	lastY = ypos;
+
+	if (uState == Normal && bViewPortActive)
+	{
 		camera.ProcessMouseMovement(xoffset, yoffset);
+	}
+
+	if (uState == Move && bViewPortActive)
+	{
+		xoffset *= 0.1f;
+		location[0] += xoffset;
+
 	}
 }
 
