@@ -23,6 +23,8 @@ void renderPlane(); unsigned int planeVBO = 0, planeVAO = 0;
 void renderCube();	unsigned int cubeVAO = 0, cubeVBO = 0;
 void renderSphere();
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
 int SRC_WIDTH = 1600;
 int SRC_HEIGHT = 900;
 
@@ -30,7 +32,8 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 // Camera
-Camera camera(glm::vec3(0.0f, 0.0f, 7.0f));
+Camera camera(glm::vec3(-4.4f, 3.1f, 4.6f), glm::vec3(0.0f, 1.0f, 0.0f), -46.0f, -26.5f);
+
 float lastX = (float)SRC_WIDTH / 2.f, lastY = (float)SRC_HEIGHT / 2.f;
 bool bFirstMouse = true;
 bool bViewPortActive = true;
@@ -90,6 +93,7 @@ int main(void)
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
+	glfwSetKeyCallback(window, key_callback);
 
 	// Initialize ImGUI
 	IMGUI_CHECKVERSION();
@@ -136,6 +140,8 @@ int main(void)
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+
+		ImGui::ShowDemoWindow();
 
 		// ImGUI window creation
 		ImGui::Begin("ToolBar");
@@ -191,7 +197,7 @@ int main(void)
 		model = glm::rotate(model, glm::radians(rotation[0]), glm::vec3(1,0,0));
 		model = glm::rotate(model, glm::radians(rotation[1]), glm::vec3(0, 1, 0));
 		model = glm::rotate(model, glm::radians(rotation[2]), glm::vec3(0, 0, 1));
-		
+
 		// use shader
 		unlit.use();
 		unlit.setMat4("projection", projection);
@@ -266,22 +272,25 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	if (key == GLFW_KEY_TAB && action == GLFW_PRESS)
+	{
+		std::cout << "stop pressing me" << std::endl;
+		bViewPortActive = !bViewPortActive;
+
+		if (bViewPortActive)
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		else
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+}
 void processInput(GLFWwindow* window)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
-
-	if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS)
-	{
-		bViewPortActive = !bViewPortActive;
-
-		if(bViewPortActive)
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-		else
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-
-
-	}
+	
+	//set viewPortActive via TAB, which is a key callback
 	if (bViewPortActive)
 	{
 		if (uState == Normal)
