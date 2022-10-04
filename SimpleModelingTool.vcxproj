@@ -193,6 +193,9 @@
     <None Include="src\shaders\DirLight\dirLight.frag" />
     <None Include="src\shaders\unlit\unlit.frag" />
     <None Include="src\shaders\unlit\unlit.vert" />
+    <None Include="src\shaders\visualizeNormals\visualizeNormals.frag" />
+    <None Include="src\shaders\visualizeNormals\visualizeNormals.geom" />
+    <None Include="src\shaders\visualizeNormals\visualizeNormals.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

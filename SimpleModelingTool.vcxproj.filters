@@ -89,5 +89,8 @@
     <None Include="src\shaders\unlit\unlit.frag" />
     <None Include="src\shaders\DirLight\dirLight.frag" />
     <None Include="src\shaders\DirLight\dirLight.vert" />
+    <None Include="src\shaders\visualizeNormals\visualizeNormals.vert" />
+    <None Include="src\shaders\visualizeNormals\visualizeNormals.frag" />
+    <None Include="src\shaders\visualizeNormals\visualizeNormals.geom" />
   </ItemGroup>
 </Project>
