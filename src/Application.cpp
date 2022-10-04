@@ -99,15 +99,21 @@ int main(void)
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+
 	// Variables to be changed in the ImGUI window
-	bool drawTriangle = true;
+	bool bDirLightToggle = true;
 	float size = 1.0f;
 	float color[4] = { 0.8f, 0.3f, 0.02f, 1.0f };
 	//TODO : encapsualte geometry data
 	float scale[3] = { 1.0,1.0,1.0 };
 	float rotation[3] = { 0.0,0.0,0.0 };
+	float lightDirection[3] = { -2.2, -4.0, -3.3 };
 
 	Shader unlit("src/shaders/unlit/unlit.vert", "src/shaders/unlit/unlit.frag");
+	// Directional light shader
+	Shader dirLight("src/shaders/DirLight/dirLight.vert", "src/shaders/DirLight/dirLight.frag");
 
 	std::vector<std::string> shapes{ "PLANE", "CUBE", "SPHERE" };
 
@@ -122,7 +128,7 @@ int main(void)
 		// Specify the color of the background
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		// Clean the back buffer and assign the new color to it
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		processInput(window);
 		// Tell OpenGL a new frame is about to begin
 		ImGui_ImplOpenGL3_NewFrame();
@@ -134,7 +140,9 @@ int main(void)
 		// Text that appears in the window
 		ImGui::Text("Hello there adventurer!");
 		// Checkbox that appears in the window
-		ImGui::Checkbox("Draw Triangle", &drawTriangle);
+		ImGui::Checkbox("DirLight Toggle", &bDirLightToggle);
+		// Lighd Direction
+		ImGui::DragFloat3("Light Direction", lightDirection);
 		// Slider that appears in the window
 		ImGui::SliderFloat("Size", &size, 0.5f, 2.0f);
 		// Fancy color editor that appears in the window
@@ -185,6 +193,24 @@ int main(void)
 		unlit.setMat4("projection", projection);
 		unlit.setMat4("view", view);
 		unlit.setMat4("model", model);
+
+		//DIRLIGHT
+		// --------
+		if(bDirLightToggle){
+			//lightshade
+			dirLight.use();
+			dirLight.setVec3("light.direction", glm::vec3(lightDirection[0], lightDirection[1], lightDirection[2]));
+			dirLight.setVec3("viewPos", camera.Position);
+		
+			//light properties
+			dirLight.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+			dirLight.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+		
+			dirLight.setMat4("projection", projection);
+			dirLight.setMat4("view", view);
+			dirLight.setMat4("model", model);
+		}
+
 
 		// set matrice information in shader
 
@@ -237,6 +263,7 @@ void processInput(GLFWwindow* window)
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		else
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
 
 	}
 	if (bViewPortActive)

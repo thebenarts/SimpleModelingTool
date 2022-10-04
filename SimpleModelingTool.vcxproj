@@ -189,6 +189,8 @@
     <ClInclude Include="src\vendor\imgui\include\imstb_truetype.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\shaders\DirLight\dirLight.vert" />
+    <None Include="src\shaders\DirLight\dirLight.frag" />
     <None Include="src\shaders\unlit\unlit.frag" />
     <None Include="src\shaders\unlit\unlit.vert" />
   </ItemGroup>
