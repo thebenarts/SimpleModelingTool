@@ -117,6 +117,7 @@ int main(void)
 		// Fancy color editor that appears in the window
 		ImGui::ColorEdit4("Color", color);
 		// Ends the window
+
 		ImGui::End();
 
 		glm::mat4 projection = glm::perspective(glm::radians(camera.FieldOfView), (float)SRC_WIDTH / (float)SRC_HEIGHT, 0.1f, 100.f);
