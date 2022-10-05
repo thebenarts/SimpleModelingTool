@@ -269,7 +269,7 @@ int main(void)
 		// ----------------------------------------
 		//bpModel.Draw(dirLight);
 
-		//renderShape();
+		renderShape();
 
 		//--------------------------	vis Normals
 		if (bVertexNormalToggle)
