@@ -28,6 +28,7 @@ void renderCube();	unsigned int cubeVAO = 0, cubeVBO = 0;
 void renderSphere();
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void renderBp();
 
 int SRC_WIDTH = 1600;
 int SRC_HEIGHT = 900;
@@ -155,7 +156,7 @@ int main(void)
 	Shader visNormals("src/shaders/visualizeNormals/visualizeNormals.vert", "src/shaders/visualizeNormals/visualizeNormals.frag", "src/shaders/visualizeNormals/visualizeNormals.geom");
 	Shader guideGrid("src/shaders/grid/gridGuide.vert", "src/shaders/grid/gridGuide.frag");
 
-	std::vector<std::string> shapes{ "PLANE", "CUBE", "SPHERE" };
+	std::vector<std::string> shapes{ "PLANE", "CUBE", "SPHERE"};
 
 
 	//--------------------ASSIMP-------------------
@@ -267,9 +268,10 @@ int main(void)
 
 		// Draw Backpack model with dirlight shader
 		// ----------------------------------------
-		//bpModel.Draw(dirLight);
+		
+		//bpModel.Draw(unlit);
 
-		//renderShape();
+		renderShape();
 
 		//--------------------------	vis Normals
 		if (bVertexNormalToggle)
@@ -416,7 +418,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS)
 	{
-		std::cout << "stop pressing me" << std::endl;
 		bViewPortActive = !bViewPortActive;
 
 		if (bViewPortActive)
@@ -499,10 +500,8 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 	{
 		xoffset *= 0.1f;
 		location[0] += xoffset;
-
 	}
 }
-
 void renderShape()
 {
 	switch (selectedShape)
