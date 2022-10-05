@@ -6,8 +6,8 @@ mat4 projection;
 mat4 view;
 } vs_in;
 
-float far = gl_DepthRange.far;
-float near = gl_DepthRange.near;
+float far = 1.0f;
+float near = 0.0f;
 
 in vec3 nearPoint;
 in vec3 farPoint;
