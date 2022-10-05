@@ -192,7 +192,7 @@ int main(void)
 		std::cout << "ERROR::FRAMEBUFFER:: framebuffer not complete" << std::endl;
 		return -1;
 	}
-
+	
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	//-----------------------------------------------------------------------------------------------------
@@ -359,10 +359,11 @@ int main(void)
 			}
 			ImGui::End();
 		}
-
-	if (ImGui::Begin("ViewPortTest"))
+		bool bf = true;
+	if (ImGui::Begin("ViewPortTest",&bf , ImGuiWindowFlags_NoScrollbar))
 	{
-		ImGui::Image((ImTextureID)textureColorBuffer, ImVec2(1280, 720),ImVec2(0,1),ImVec2(1,0));
+		ImVec2 size = ImGui::GetWindowSize();
+		ImGui::Image((ImTextureID)textureColorBuffer,size,ImVec2(0,1),ImVec2(1,0));
 		ImGui::End();
 	}
 
