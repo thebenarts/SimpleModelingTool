@@ -6,8 +6,8 @@ mat4 projection;
 mat4 view;
 } vs_in;
 
-float far = 1.0f;
-float near = 0.0f;
+float far = 100.0f;
+float near = 0.1f;
 
 in vec3 nearPoint;
 in vec3 farPoint;
@@ -39,13 +39,34 @@ float computeDepth(vec3 pos)
 	return (clip_space_pos.z / clip_space_pos.w);
 }
 
+
+float computeLinearDepth(vec3 pos) {
+    vec4 clip_space_pos = vs_in.projection * vs_in.view * vec4(pos.xyz, 1.0);
+    float clip_space_depth = (clip_space_pos.z / clip_space_pos.w) * 2.0 - 1.0; // put back between -1 and 1
+    float linearDepth = (2.0 * near * far) / (far + near - clip_space_depth * (far - near)); // get linear value between 0.01 and 100
+    return linearDepth / far; // normalize
+}
+
+
 void main()
 {
 	float t = -nearPoint.y / (farPoint.y - nearPoint.y);
 	vec3 fragPos3D = nearPoint + t * (farPoint - nearPoint);
 
+
+	//------------------------------
 	float ndc_depth = computeDepth(fragPos3D);
-	float depth = (((far-near) * ndc_depth) + near + far) / 2.0;
+
+	// JANK CODE!!! Need forumla to Normalize 100 -> 0.1 to 1->0;
+    float depth = (((1-0) * ndc_depth) + 0 + 1) / 2.0;
+	//------------------------------
+
+	float linearDepth = computeLinearDepth(fragPos3D);
+	float fading = max(0, (0.5 - linearDepth));
+
 	gl_FragDepth = depth;
-	FragColor = grid(fragPos3D, 1) * float(t > 0);
+
+	//FragColor = vec4(vec3(fading),1.0);
+	FragColor =(grid(fragPos3D, 1) + grid(fragPos3D, 0.2))* float(t > 0);
+	FragColor.a *= fading;
 }
