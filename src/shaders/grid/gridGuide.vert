@@ -26,7 +26,7 @@ void main()
 	vs_out.projection =projection;
 	vs_out.view = view;
 
-	nearPoint = UnprojectPoint(0f);
+	nearPoint = UnprojectPoint(0.0f);
 	farPoint = UnprojectPoint(1.0f);
 	gl_Position = vec4(aPos,1.0);
 }

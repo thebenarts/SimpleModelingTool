@@ -28,6 +28,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 int SRC_WIDTH = 1600;
 int SRC_HEIGHT = 900;
 
+int SCREEN_RES_W = 2560;
+int SCREEN_RES_H = 1440;
+
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
@@ -99,9 +102,32 @@ int main(void)
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
+   //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+	//io.ConfigViewportsNoAutoMerge = true;
+	//io.ConfigViewportsNoTaskBarIcon = true;
+
+	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
+	//ImGui::StyleColorsLight();
+
+	// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+	ImGuiStyle& style = ImGui::GetStyle();
+	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+	{
+		style.WindowRounding = 0.0f;
+		style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+	}
+
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
+
+	//---------------------------------- IF WE WANT CUSTOM FONTS WE SHOULD LOAD THEM HERE ---------------------------------------
+	// 	   EXAMPLE
+	//io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
+
 
 	glEnable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -127,6 +153,42 @@ int main(void)
 
 	std::vector<std::string> shapes{ "PLANE", "CUBE", "SPHERE" };
 
+	//----------------------------------------------------- CREATE FRAMEBUFFER ----------------------------------------------------------
+	unsigned int fbo;
+	glGenFramebuffers(1, &fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+	// generate texture that our framebuffer can write to
+	unsigned int textureColorBuffer;
+	glGenTextures(1, &textureColorBuffer);
+	glBindTexture(GL_TEXTURE_2D, textureColorBuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCREEN_RES_W, SCREEN_RES_H, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	// attach texture to fbo
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorBuffer, 0);
+
+	unsigned int rbo;
+	glGenRenderbuffers(1, &rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCREEN_RES_W, SCREEN_RES_H);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		std::cout << "ERROR::FRAMEBUFFER:: framebuffer not complete" << std::endl;
+		return -1;
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	//-----------------------------------------------------------------------------------------------------
+
+	bool bTest = true;
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -135,6 +197,7 @@ int main(void)
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
+	// ----------------------------------------------------------------- RENDER OPENGL----------------------------------------------------------------------
 		// Specify the color of the background
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		// Clean the back buffer and assign the new color to it
@@ -144,6 +207,98 @@ int main(void)
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+
+
+		// try rendering to custom framebuffer
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		// Specify the color of the background
+		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+		// Clean the back buffer and assign the new color to it
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glViewport(0, 0, SCREEN_RES_W, SCREEN_RES_H);
+
+		glm::mat4 projection = glm::perspective(glm::radians(camera.FieldOfView), (float)SRC_WIDTH / (float)SRC_HEIGHT, 0.1f, 100.f);
+		glm::mat4 view = camera.GetViewMatrix();
+		glm::mat4 model = glm::mat4(1.0f);
+
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(location[0], location[1], location[2]));
+		model = glm::scale(model, glm::vec3(scale[0], scale[1], scale[2]));
+		model = glm::rotate(model, glm::radians(rotation[0]), glm::vec3(1, 0, 0));
+		model = glm::rotate(model, glm::radians(rotation[1]), glm::vec3(0, 1, 0));
+		model = glm::rotate(model, glm::radians(rotation[2]), glm::vec3(0, 0, 1));
+
+		// use shader
+		unlit.use();
+		unlit.setMat4("projection", projection);
+		unlit.setMat4("view", view);
+		unlit.setMat4("model", model);
+
+		//DIRLIGHT
+		// --------
+		if (bDirLightToggle) {
+			//lightshade
+			dirLight.use();
+			//dirLight.setVec3("light.direction", glm::vec3(lightDirection[0], lightDirection[1], lightDirection[2]));
+			// I AM THE DIRLIGHT
+			dirLight.setVec3("light.direction", glm::vec3(camera.Front));
+			dirLight.setVec3("viewPos", camera.Position);
+
+			//light properties
+			dirLight.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+			dirLight.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+
+			dirLight.setMat4("projection", projection);
+			dirLight.setMat4("view", view);
+			dirLight.setMat4("model", model);
+		}
+
+
+		// set matrice information in shader
+
+		renderShape();
+
+		//--------------------------	vis Normals
+		if (bVertexNormalToggle)
+		{
+			visNormals.use();
+			visNormals.setMat4("view", view);
+			visNormals.setMat4("model", model);
+			visNormals.setMat4("projection", projection);
+			renderShape();
+		}
+
+		guideGrid.use();
+		guideGrid.setMat4("projection", projection);
+		guideGrid.setMat4("view", view);
+		renderPlane();
+
+		//----------------------------------------------------------- IMGUI -------------------------------------------------------------
+
+		// set back to regular framebuffer
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		// Specify the color of the background
+		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+		// Clean the back buffer and assign the new color to it
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glViewport(0, 0, SRC_WIDTH, SRC_HEIGHT);
+		
+
+		// -----------------------------------------------CREATE THE MAIN IMGUI WINDOW THAT ALL OTHER WINDOWS WILL BE DOCKED IN----------------------------------------
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->WorkPos);
+		ImGui::SetNextWindowSize(viewport->WorkSize);
+		ImGui::SetNextWindowViewport(viewport->ID);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoScrollbar;
+
+		ImGui::Begin("SimpleModelingTool");
+		ImGui::End();
+		ImGui::PopStyleVar(2);
+		// --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 		// ImGUI window creation
 		ImGui::Begin("ToolBar");
@@ -190,66 +345,26 @@ int main(void)
 			ImGui::End();
 		}
 
-		glm::mat4 projection = glm::perspective(glm::radians(camera.FieldOfView), (float)SRC_WIDTH / (float)SRC_HEIGHT, 0.1f, 100.f);
-		glm::mat4 view = camera.GetViewMatrix();
-		glm::mat4 model = glm::mat4(1.0f);
-
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(location[0], location[1], location[2]));
-		model = glm::scale(model, glm::vec3(scale[0], scale[1], scale[2]));
-		model = glm::rotate(model, glm::radians(rotation[0]), glm::vec3(1, 0, 0));
-		model = glm::rotate(model, glm::radians(rotation[1]), glm::vec3(0, 1, 0));
-		model = glm::rotate(model, glm::radians(rotation[2]), glm::vec3(0, 0, 1));
-
-		// use shader
-		unlit.use();
-		unlit.setMat4("projection", projection);
-		unlit.setMat4("view", view);
-		unlit.setMat4("model", model);
-
-		//DIRLIGHT
-		// --------
-		if(bDirLightToggle){
-			//lightshade
-			dirLight.use();
-			//dirLight.setVec3("light.direction", glm::vec3(lightDirection[0], lightDirection[1], lightDirection[2]));
-			// I AM THE DIRLIGHT
-			dirLight.setVec3("light.direction", glm::vec3(camera.Front));
-			dirLight.setVec3("viewPos", camera.Position);
-		
-			//light properties
-			dirLight.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
-			dirLight.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
-		
-			dirLight.setMat4("projection", projection);
-			dirLight.setMat4("view", view);
-			dirLight.setMat4("model", model);
-		}
-
-
-		// set matrice information in shader
-
-		renderShape();
-
-		//--------------------------	vis Normals
-		if (bVertexNormalToggle)
-		{
-			visNormals.use();
-			visNormals.setMat4("view", view);
-			visNormals.setMat4("model", model);
-			visNormals.setMat4("projection", projection);
-			renderShape();
-		}
-
-		guideGrid.use();
-		guideGrid.setMat4("projection", projection);
-		guideGrid.setMat4("view", view);
-		renderPlane();
-	
+	if (ImGui::Begin("ViewPortTest"))
+	{
+		ImGui::Image((ImTextureID)textureColorBuffer, ImVec2(1280, 720),ImVec2(0,1),ImVec2(1,0));
+		ImGui::End();
+	}
 
 		// Renders the ImGUI elements
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		// Update and Render additional Platform Windows
+	  // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
+	  //  For this specific demo app we could also call glfwMakeContextCurrent(window) directly)
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		{
+			GLFWwindow* backup_current_context = glfwGetCurrentContext();
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+			glfwMakeContextCurrent(backup_current_context);
+		}
 
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(window);
