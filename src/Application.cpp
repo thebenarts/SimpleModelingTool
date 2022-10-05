@@ -7,9 +7,13 @@
 #include<glm/gtc/matrix_transform.hpp>
 #include<glm/gtc/type_ptr.hpp>
 
+#include<assimp/Importer.hpp>
+
 #include "Camera.h"
 #include "Shader.h"			// includes glad/glad.h
 #include "stb_image.h"
+#include "model.h"
+#include "Shader.h"
 
 #include <GLFW/glfw3.h>
 // RUN THIS ON X64
@@ -137,7 +141,7 @@ int main(void)
 
 	// Variables to be changed in the ImGUI window
 	bool bDirLightToggle = true;
-	bool bVertexNormalToggle = true;
+	bool bVertexNormalToggle = false;
 	float size = 1.0f;
 	float color[4] = { 0.8f, 0.3f, 0.02f, 1.0f };
 	//TODO : encapsualte geometry data
@@ -152,6 +156,10 @@ int main(void)
 	Shader guideGrid("src/shaders/grid/gridGuide.vert", "src/shaders/grid/gridGuide.frag");
 
 	std::vector<std::string> shapes{ "PLANE", "CUBE", "SPHERE" };
+
+
+	//--------------------ASSIMP-------------------
+	Model bpModel("src/assets/backpack/backpack.obj");
 
 	//----------------------------------------------------- CREATE FRAMEBUFFER ----------------------------------------------------------
 	unsigned int fbo;
@@ -255,8 +263,13 @@ int main(void)
 
 
 		// set matrice information in shader
+		
 
-		renderShape();
+		// Draw Backpack model with dirlight shader
+		// ----------------------------------------
+		//bpModel.Draw(dirLight);
+
+		//renderShape();
 
 		//--------------------------	vis Normals
 		if (bVertexNormalToggle)
