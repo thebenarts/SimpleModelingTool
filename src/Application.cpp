@@ -7,9 +7,13 @@
 #include<glm/gtc/matrix_transform.hpp>
 #include<glm/gtc/type_ptr.hpp>
 
+#include<assimp/Importer.hpp>
+
 #include "Camera.h"
 #include "Shader.h"			// includes glad/glad.h
 #include "stb_image.h"
+#include "model.h"
+#include "Shader.h"
 
 #include <GLFW/glfw3.h>
 // RUN THIS ON X64
@@ -153,6 +157,10 @@ int main(void)
 
 	std::vector<std::string> shapes{ "PLANE", "CUBE", "SPHERE" };
 
+
+	//--------------------ASSIMP-------------------
+	Model bpModel("src/assets/backpack/backpack.obj");
+
 	//----------------------------------------------------- CREATE FRAMEBUFFER ----------------------------------------------------------
 	unsigned int fbo;
 	glGenFramebuffers(1, &fbo);
@@ -255,8 +263,13 @@ int main(void)
 
 
 		// set matrice information in shader
+		
 
-		renderShape();
+		// Draw Backpack model with dirlight shader
+		// ----------------------------------------
+		//bpModel.Draw(dirLight);
+
+		//renderShape();
 
 		//--------------------------	vis Normals
 		if (bVertexNormalToggle)

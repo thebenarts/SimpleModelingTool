@@ -83,6 +83,12 @@
     <ClInclude Include="src\vendor\stb_image\include\stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\shaders\unlit\unlit.vert" />
@@ -94,5 +100,8 @@
     <None Include="src\shaders\visualizeNormals\visualizeNormals.geom" />
     <None Include="src\shaders\grid\gridGuide.vert" />
     <None Include="src\shaders\grid\gridGuide.frag" />
+    <None Include="src\shaders\wireframe\wireframe.vert" />
+    <None Include="src\shaders\wireframe\wireframe.geom" />
+    <None Include="src\shaders\wireframe\wireframe.frag" />
   </ItemGroup>
 </Project>
