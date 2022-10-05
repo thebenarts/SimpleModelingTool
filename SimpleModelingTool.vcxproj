@@ -198,6 +198,9 @@
     <None Include="src\shaders\visualizeNormals\visualizeNormals.frag" />
     <None Include="src\shaders\visualizeNormals\visualizeNormals.geom" />
     <None Include="src\shaders\visualizeNormals\visualizeNormals.vert" />
+    <None Include="src\shaders\wireframe\wireframe.frag" />
+    <None Include="src\shaders\wireframe\wireframe.geom" />
+    <None Include="src\shaders\wireframe\wireframe.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

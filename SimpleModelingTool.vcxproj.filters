@@ -94,5 +94,8 @@
     <None Include="src\shaders\visualizeNormals\visualizeNormals.geom" />
     <None Include="src\shaders\grid\gridGuide.vert" />
     <None Include="src\shaders\grid\gridGuide.frag" />
+    <None Include="src\shaders\wireframe\wireframe.vert" />
+    <None Include="src\shaders\wireframe\wireframe.geom" />
+    <None Include="src\shaders\wireframe\wireframe.frag" />
   </ItemGroup>
 </Project>
