@@ -6,12 +6,15 @@
 
 
 #include <stb_image.h>
+#include "simpleModel.h"
 
 
 // Instantiate static variables
 
 std::map<std::string, Texture2D> ResourceManager::texture2DMap;
 std::map<std::string, Shader*> ResourceManager::shadersMap;
+std::map<unsigned int, Object*> ResourceManager::objectMap;
+
 unsigned int ResourceManager::resourceID = 0;
 
 Shader* ResourceManager::GetShader(std::string name)
@@ -113,4 +116,10 @@ void ResourceManager::Clear()
 	// properly delete all textures
 	for (auto iter : texture2DMap)
 		glDeleteTextures(1, &iter.second.ID);
+}
+
+void ResourceManager::CreateCube()
+{
+	Cube* cObject = new Cube();
+	objectMap[getResourceID()] = static_cast<Object*>(cObject);
 }

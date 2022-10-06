@@ -122,7 +122,6 @@ public:
 			FieldOfView = 100.f;
 	}
 
-
 private:
 	void UpdateCameraVectors()
 	{

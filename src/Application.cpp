@@ -16,6 +16,8 @@
 
 #include "model.h"
 #include "resourcemanager.h"
+#include "renderer.h"
+#include "simpleModel.h"
 
 #include <GLFW/glfw3.h>
 // RUN THIS ON X64
@@ -207,7 +209,9 @@ int main(void)
 	Shader* dirLight = ResourceManager::GetShader("dirLight");
 	Shader* visNormals = ResourceManager::GetShader("visNormals");
 	Shader* guideGrid = ResourceManager::GetShader("guideGrid");
-	std::cout << ResourceManager::getObjectID() << std::endl;
+	std::cout << ResourceManager::getResourceID() << std::endl;
+
+	Cube* cube = new Cube();
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -236,67 +240,94 @@ int main(void)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glViewport(0, 0, SCREEN_RES_W, SCREEN_RES_H);
 
-		glm::mat4 projection = glm::perspective(glm::radians(camera.FieldOfView), (float)SRC_WIDTH / (float)SRC_HEIGHT, 0.1f, 100.f);
+		//--------------------------------------------------------------------------------------------------------------------------------
+
+		//glm::mat4 projection = glm::perspective(glm::radians(camera.FieldOfView), (float)SCREEN_RES_W / (float)SCREEN_RES_H, 0.1f, 100.f);
+		//glm::mat4 view = camera.GetViewMatrix();
+		//glm::mat4 model = glm::mat4(1.0f);
+
+		//model = glm::mat4(1.0f);
+		//model = glm::translate(model, glm::vec3(location[0], location[1], location[2]));
+		//model = glm::scale(model, glm::vec3(scale[0], scale[1], scale[2]));
+		//model = glm::rotate(model, glm::radians(rotation[0]), glm::vec3(1, 0, 0));
+		//model = glm::rotate(model, glm::radians(rotation[1]), glm::vec3(0, 1, 0));
+		//model = glm::rotate(model, glm::radians(rotation[2]), glm::vec3(0, 0, 1));
+
+		//// use shader
+		//unlit->Use();
+		//unlit->setMat4("projection", projection);
+		//unlit->setMat4("view", view);
+		//unlit->setMat4("model", model);
+
+		////DIRLIGHT
+		//// --------
+		//if (bDirLightToggle) {
+		//	//lightshade
+		//	dirLight->Use();
+		//	//dirLight.setVec3("light.direction", glm::vec3(lightDirection[0], lightDirection[1], lightDirection[2]));
+		//	// I AM THE DIRLIGHT
+		//	dirLight->setVec3("light.direction", glm::vec3(camera.Front));
+		//	dirLight->setVec3("viewPos", camera.Position);
+		//			
+		//	//light properties
+		//	dirLight->setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+		//	dirLight->setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+		//			
+		//	dirLight->setMat4("projection", projection);
+		//	dirLight->setMat4("view", view);
+		//	dirLight->setMat4("model", model);
+		//}
+
+
+		//// set matrice information in shader
+		//
+
+		//// Draw Backpack model with dirlight shader
+		//// ----------------------------------------
+		//
+		////bpModel.Draw(unlit);
+
+		//renderShape();
+
+		////--------------------------	vis Normals
+		//if (bVertexNormalToggle)
+		//{
+		//	visNormals->Use();
+		//	visNormals->setMat4("view", view);
+		//	visNormals->setMat4("model", model);
+		//	visNormals->setMat4("projection", projection);
+		//	renderShape();
+		//}
+
+		Renderer::RenderScene(camera);
+		
+		//glm::mat4 projection = glm::perspective(glm::radians(camera.FieldOfView), (float)SCREEN_RES_W / (float)SCREEN_RES_H, 0.1f, 100.f);
+		//glm::mat4 view = camera.GetViewMatrix();
+		//glm::mat4 model = glm::mat4(1.0f);
+		//dirLight->Use();
+		////dirLight.setVec3("light.direction", glm::vec3(lightDirection[0], lightDirection[1], lightDirection[2]));
+		//// I AM THE DIRLIGHT
+		//dirLight->setVec3("light.direction", glm::vec3(camera.Front));
+		//dirLight->setVec3("viewPos", camera.Position);
+		//			
+		////light properties
+		//dirLight->setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+		//dirLight->setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+		//			
+		//dirLight->setMat4("projection", projection);
+		//dirLight->setMat4("view", view);
+		//dirLight->setMat4("model", model);
+
+		//cube->Draw(dirLight);
 		glm::mat4 view = camera.GetViewMatrix();
-		glm::mat4 model = glm::mat4(1.0f);
-
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(location[0], location[1], location[2]));
-		model = glm::scale(model, glm::vec3(scale[0], scale[1], scale[2]));
-		model = glm::rotate(model, glm::radians(rotation[0]), glm::vec3(1, 0, 0));
-		model = glm::rotate(model, glm::radians(rotation[1]), glm::vec3(0, 1, 0));
-		model = glm::rotate(model, glm::radians(rotation[2]), glm::vec3(0, 0, 1));
-
-		// use shader
-		unlit->Use();
-		unlit->setMat4("projection", projection);
-		unlit->setMat4("view", view);
-		unlit->setMat4("model", model);
-
-		//DIRLIGHT
-		// --------
-		if (bDirLightToggle) {
-			//lightshade
-			dirLight->Use();
-			//dirLight.setVec3("light.direction", glm::vec3(lightDirection[0], lightDirection[1], lightDirection[2]));
-			// I AM THE DIRLIGHT
-			dirLight->setVec3("light.direction", glm::vec3(camera.Front));
-			dirLight->setVec3("viewPos", camera.Position);
-					
-			//light properties
-			dirLight->setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
-			dirLight->setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
-					
-			dirLight->setMat4("projection", projection);
-			dirLight->setMat4("view", view);
-			dirLight->setMat4("model", model);
-		}
-
-
-		// set matrice information in shader
-		
-
-		// Draw Backpack model with dirlight shader
-		// ----------------------------------------
-		
-		//bpModel.Draw(unlit);
-
-		renderShape();
-
-		//--------------------------	vis Normals
-		if (bVertexNormalToggle)
-		{
-			visNormals->Use();
-			visNormals->setMat4("view", view);
-			visNormals->setMat4("model", model);
-			visNormals->setMat4("projection", projection);
-			renderShape();
-		}
-
+		glm::mat4 projection = glm::perspective(glm::radians(90.f), (float)2560 / (float)1440, 0.1f, 100.f);
 		guideGrid->Use();
 		guideGrid->setMat4("projection", projection);
 		guideGrid->setMat4("view", view);
 		renderPlane();
+
+
+		//---------------------------------------------------------------------------------------------------------------------------------
 
 		//----------------------------------------------------------- IMGUI -------------------------------------------------------------
 
@@ -361,6 +392,8 @@ int main(void)
 					{
 						selectedShape = i;
 						std::cout << selectedShape << std::endl;
+						Cube* cObject = new Cube();
+						ResourceManager::objectMap[ResourceManager::getResourceID()] = static_cast<Object*>(cObject);
 					}
 
 					ImGui::PopID();
@@ -521,16 +554,12 @@ void renderShape()
 	switch (selectedShape)
 	{
 	case 0:
-		renderPlane();
-		break;
-	case 1: 
-		renderCube();
-		break;
-	case 2:
-		renderSphere();
+	{
+		Cube* cObject = new Cube();
+		ResourceManager::objectMap[ResourceManager::getResourceID()] = static_cast<Object*>(cObject);
+	}
 		break;
 	default:
-		renderCube();
 		break;
 	}
 }

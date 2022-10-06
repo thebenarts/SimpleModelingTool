@@ -11,6 +11,7 @@
 
 #include "texture.h"
 #include "shader_m.h"
+#include "object.h"
 
 // RESOURCE MANAGER Stores all Shaders, Textures
 
@@ -25,6 +26,7 @@ public:
 	// resource storage
 	static std::map<std::string, Shader*> shadersMap;
 	static std::map<std::string, Texture2D> texture2DMap;
+	static std::map<unsigned int, Object*> objectMap;
 	// loads (and generates) a shader program from file loading vertex, fragment (and geometry) shadrer's source code.
 	static Shader* LoadShader(std::string name, const char* vShaderfile, const char* fShaderFile, const char* gShaderFile);
 	// retrieves stored shader
@@ -39,7 +41,8 @@ public:
 	
 	static unsigned int getResourceID() { return resourceID++; }
 
-	
+	static void CreateCube();
+
 private:
 	// private constructor, that is we do not want any actual resource manager objects. Its members and functions should be publicly available(static)
 	ResourceManager(){}
