@@ -33,6 +33,7 @@ public:
 	void setMat2(const std::string& name, const glm::mat2& value, bool useShader = false);
 	void setMat3(const std::string& name, const glm::mat3& value, bool useShader = false);
 	void setMat4(const std::string& name, const glm::mat4& value, bool useShader = false);
+	void setPVM(const glm::mat4& projection, const glm::mat4& view, const glm::mat4& model, bool useShader = false);
 
 private:
 	void checkCompileErrors(unsigned int object, std::string type);

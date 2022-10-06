@@ -165,6 +165,7 @@
   <ItemGroup>
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\glad.c" />
+    <ClCompile Include="src\renderer.cpp" />
     <ClCompile Include="src\resourcemanager.cpp" />
     <ClCompile Include="src\shader_m.cpp" />
     <ClCompile Include="src\texture.cpp" />
@@ -181,6 +182,7 @@
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\mesh.h" />
     <ClInclude Include="src\model.h" />
+    <ClInclude Include="src\renderer.h" />
     <ClInclude Include="src\resourcemanager.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\shader_m.h" />
