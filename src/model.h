@@ -12,7 +12,7 @@
 
 #include "object.h"
 #include "mesh.h"
-#include "Shader.h"
+#include "shader_m.h"
 
 #include <string>
 #include <fstream>

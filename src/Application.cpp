@@ -10,10 +10,12 @@
 #include<assimp/Importer.hpp>
 
 #include "Camera.h"
-#include "Shader.h"			// includes glad/glad.h
-#include "stb_image.h"
+//#include "Shader.h"	// includes glad/glad.h
+
+#include <stb_image.h>
+
 #include "model.h"
-#include "Shader.h"
+#include "resourcemanager.h"
 
 #include <GLFW/glfw3.h>
 // RUN THIS ON X64
@@ -149,17 +151,20 @@ int main(void)
 	float rotation[3] = { 0.0,0.0,0.0 };
 	//float lightDirection[3] = { -2.2, -4.0, -3.3 };
 
-	Shader unlit("src/shaders/unlit/unlit.vert", "src/shaders/unlit/unlit.frag");
-	// Directional light shader
-	Shader dirLight("src/shaders/DirLight/dirLight.vert", "src/shaders/DirLight/dirLight.frag");
-	Shader visNormals("src/shaders/visualizeNormals/visualizeNormals.vert", "src/shaders/visualizeNormals/visualizeNormals.frag", "src/shaders/visualizeNormals/visualizeNormals.geom");
-	Shader guideGrid("src/shaders/grid/gridGuide.vert", "src/shaders/grid/gridGuide.frag");
+	//Shader unlit("src/shaders/unlit/unlit.vert", "src/shaders/unlit/unlit.frag");
+	//Shader dirLight("src/shaders/DirLight/dirLight.vert", "src/shaders/DirLight/dirLight.frag");
+	//Shader visNormals("src/shaders/visualizeNormals/visualizeNormals.vert", "src/shaders/visualizeNormals/visualizeNormals.frag", "src/shaders/visualizeNormals/visualizeNormals.geom");
+	//Shader guideGrid("src/shaders/grid/gridGuide.vert", "src/shaders/grid/gridGuide.frag");
+
+	ResourceManager::LoadShader("unlit", "src/shaders/unlit/unlit.vert", "src/shaders/unlit/unlit.frag", nullptr);
+	ResourceManager::LoadShader("dirLight", "src/shaders/DirLight/dirLight.vert", "src/shaders/DirLight/dirLight.frag", nullptr);
+	ResourceManager::LoadShader("visNormals", "src/shaders/visualizeNormals/visualizeNormals.vert", "src/shaders/visualizeNormals/visualizeNormals.frag", "src/shaders/visualizeNormals/visualizeNormals.geom");
+	ResourceManager::LoadShader("guideGrid", "src/shaders/grid/gridGuide.vert", "src/shaders/grid/gridGuide.frag", nullptr);
 
 	std::vector<std::string> shapes{ "PLANE", "CUBE", "SPHERE"};
 
-
 	//--------------------ASSIMP-------------------
-	Model bpModel("src/assets/backpack/backpack.obj");
+	//Model bpModel("src/assets/backpack/backpack.obj");
 
 	//----------------------------------------------------- CREATE FRAMEBUFFER ----------------------------------------------------------
 	unsigned int fbo;
@@ -197,6 +202,12 @@ int main(void)
 	//-----------------------------------------------------------------------------------------------------
 
 	bool bTest = true;
+
+	Shader* unlit = ResourceManager::GetShader("unlit");
+	Shader* dirLight = ResourceManager::GetShader("dirLight");
+	Shader* visNormals = ResourceManager::GetShader("visNormals");
+	Shader* guideGrid = ResourceManager::GetShader("guideGrid");
+
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -237,28 +248,28 @@ int main(void)
 		model = glm::rotate(model, glm::radians(rotation[2]), glm::vec3(0, 0, 1));
 
 		// use shader
-		unlit.use();
-		unlit.setMat4("projection", projection);
-		unlit.setMat4("view", view);
-		unlit.setMat4("model", model);
+		unlit->Use();
+		unlit->setMat4("projection", projection);
+		unlit->setMat4("view", view);
+		unlit->setMat4("model", model);
 
 		//DIRLIGHT
 		// --------
 		if (bDirLightToggle) {
 			//lightshade
-			dirLight.use();
+			dirLight->Use();
 			//dirLight.setVec3("light.direction", glm::vec3(lightDirection[0], lightDirection[1], lightDirection[2]));
 			// I AM THE DIRLIGHT
-			dirLight.setVec3("light.direction", glm::vec3(camera.Front));
-			dirLight.setVec3("viewPos", camera.Position);
-
+			dirLight->setVec3("light.direction", glm::vec3(camera.Front));
+			dirLight->setVec3("viewPos", camera.Position);
+					
 			//light properties
-			dirLight.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
-			dirLight.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
-
-			dirLight.setMat4("projection", projection);
-			dirLight.setMat4("view", view);
-			dirLight.setMat4("model", model);
+			dirLight->setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+			dirLight->setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+					
+			dirLight->setMat4("projection", projection);
+			dirLight->setMat4("view", view);
+			dirLight->setMat4("model", model);
 		}
 
 
@@ -275,16 +286,16 @@ int main(void)
 		//--------------------------	vis Normals
 		if (bVertexNormalToggle)
 		{
-			visNormals.use();
-			visNormals.setMat4("view", view);
-			visNormals.setMat4("model", model);
-			visNormals.setMat4("projection", projection);
+			visNormals->Use();
+			visNormals->setMat4("view", view);
+			visNormals->setMat4("model", model);
+			visNormals->setMat4("projection", projection);
 			renderShape();
 		}
 
-		guideGrid.use();
-		guideGrid.setMat4("projection", projection);
-		guideGrid.setMat4("view", view);
+		guideGrid->Use();
+		guideGrid->setMat4("projection", projection);
+		guideGrid->setMat4("view", view);
 		renderPlane();
 
 		//----------------------------------------------------------- IMGUI -------------------------------------------------------------
