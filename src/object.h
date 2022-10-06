@@ -6,10 +6,10 @@
 class Object 
 {
 	public:
+		Object();
 
-
-
-		void Draw() {};
+		
+		void Draw();
 	private:
 		unsigned int objectID;
 		bool bVisibility;

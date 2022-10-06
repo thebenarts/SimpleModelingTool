@@ -165,8 +165,10 @@
   <ItemGroup>
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\glad.c" />
+    <ClCompile Include="src\object.cpp" />
     <ClCompile Include="src\resourcemanager.cpp" />
     <ClCompile Include="src\shader_m.cpp" />
+    <ClCompile Include="src\simpleModel.cpp" />
     <ClCompile Include="src\texture.cpp" />
     <ClCompile Include="src\vendor\imgui\imgui.cpp" />
     <ClCompile Include="src\vendor\imgui\imgui_demo.cpp" />
@@ -182,9 +184,11 @@
     <ClInclude Include="src\light.h" />
     <ClInclude Include="src\mesh.h" />
     <ClInclude Include="src\model.h" />
+    <ClInclude Include="src\object.h" />
     <ClInclude Include="src\resourcemanager.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\shader_m.h" />
+    <ClInclude Include="src\simpleModel.h" />
     <ClInclude Include="src\texture.h" />
     <ClInclude Include="src\vendor\stb_image\include\stb_image.h" />
     <ClInclude Include="src\vendor\imgui\include\imconfig.h" />

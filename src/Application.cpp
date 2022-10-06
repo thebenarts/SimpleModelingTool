@@ -207,7 +207,7 @@ int main(void)
 	Shader* dirLight = ResourceManager::GetShader("dirLight");
 	Shader* visNormals = ResourceManager::GetShader("visNormals");
 	Shader* guideGrid = ResourceManager::GetShader("guideGrid");
-
+	std::cout << ResourceManager::getObjectID() << std::endl;
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
 	{
