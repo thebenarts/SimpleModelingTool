@@ -2,8 +2,8 @@
 out vec4 FragColor;
 
 in VS_OUT{
-mat4 projection;
-mat4 view;
+	mat4 projection;
+	mat4 view;
 } vs_in;
 
 float far = 100.0f;

@@ -10,7 +10,6 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include "object.h"
 #include "mesh.h"
 #include "Shader.h"
 
@@ -24,37 +23,20 @@ using namespace std;
 
 unsigned int TextureFromFile(const char* path, const string& directory, bool gamma = false);
 
-class Model : public Object
+class Model
 {
 public:
-
-    //--------------------------------------- OUR CODE ------------------------------------
-    //--------------------------------------------------------------------------------------
-    vector<Mesh> meshes;
-    //vector<shaderProperties> shaderProp;
-
+    // model data 
+    vector<Texture> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
+    vector<Mesh>    meshes;
+    string directory;
+    bool gammaCorrection;
 
     // constructor, expects a filepath to a 3D model.
     Model(string const& path, bool gamma = false) : gammaCorrection(gamma)
     {
         loadModel(path);
     }
-
-    //--------------------------------------------------------------------------------------
-    // -----------------------------------------------------------------------------------
-
-    // model data 
-    // 
-    // SHOULD LOAD THESE TEXTURES INTO ASSET_MANAGER, 
-    // AND STORE THE POINTERS TO REQUIRED TEXTURES???
-    //              MAYBE CREATE IT AS MATERIAL???
-    vector<Texture> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
-    
-
-    string directory;
-    bool gammaCorrection;
-
-
 
     // draws the model, and thus all its meshes
     void Draw(Shader& shader)
@@ -64,10 +46,6 @@ public:
     }
 
 private:
-
-    //--------------------------------------- OUR CODE ------------------------------------
-    //--------------------------------------------------------------------------------------
-
     // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
     void loadModel(string const& path)
     {
@@ -86,10 +64,6 @@ private:
         // process ASSIMP's root node recursively
         processNode(scene->mRootNode, scene);
     }
-
-    //--------------------------------------------------------------------------------------
-    //--------------------------------------------------------------------------------------
-
 
     // processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
     void processNode(aiNode* node, const aiScene* scene)

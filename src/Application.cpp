@@ -28,7 +28,6 @@ void renderCube();	unsigned int cubeVAO = 0, cubeVBO = 0;
 void renderSphere();
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-void renderBp();
 
 int SRC_WIDTH = 1600;
 int SRC_HEIGHT = 900;
@@ -401,6 +400,9 @@ int main(void)
 	glfwTerminate();
 	return 0;
 }
+// _________________________________________________________________________________
+// ------------------------------------- END ---------------------------------------
+// _________________________________________________________________________________
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
