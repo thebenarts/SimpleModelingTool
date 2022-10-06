@@ -12,6 +12,7 @@
 
 std::map<std::string, Texture2D> ResourceManager::texture2DMap;
 std::map<std::string, Shader*> ResourceManager::shadersMap;
+unsigned int ResourceManager::resourceID = 0;
 
 Shader* ResourceManager::GetShader(std::string name)
 {

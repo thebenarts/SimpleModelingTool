@@ -12,10 +12,16 @@
 #include "texture.h"
 #include "shader_m.h"
 
+// RESOURCE MANAGER Stores all Shaders, Textures
+
+
 // static singleton resourcemanager
 class ResourceManager
 {
+
 public:
+	// unique ID incremented on every object creation
+	static unsigned int resourceID;
 	// resource storage
 	static std::map<std::string, Shader*> shadersMap;
 	static std::map<std::string, Texture2D> texture2DMap;
@@ -30,10 +36,13 @@ public:
 
 	// properly de-allocates all loaded resources
 	static void Clear();
+	
+	static unsigned int getResourceID() { return resourceID++; }
 
+	
 private:
 	// private constructor, that is we do not want any actual resource manager objects. Its members and functions should be publicly available(static)
-	ResourceManager() {}
+	ResourceManager(){}
 
 	// loads and generates a shader from file
 	static Shader* loadShaderFromFile(const char* vShaderFile, const char* fShaderFile, const char* gShaderFile = nullptr);
