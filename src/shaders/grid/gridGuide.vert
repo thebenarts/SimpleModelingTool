@@ -4,8 +4,8 @@ out vec3 nearPoint;
 out vec3 farPoint;
 
 out VS_OUT{
-	mat4 fragprojection;
-	mat4 fragview;
+	mat4 projection;
+	mat4 view;
 } vs_out;
 
 uniform mat4 projection;
@@ -23,8 +23,8 @@ vec3 UnprojectPoint(float z)
 
 void main()
 {
-	vs_out.fragprojection = projection;
-	vs_out.fragview = view;
+	vs_out.projection = projection;
+	vs_out.view = view;
 
 	nearPoint = UnprojectPoint(0.0f);
 	farPoint = UnprojectPoint(1.0f);
