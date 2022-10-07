@@ -143,5 +143,7 @@
     <None Include="src\shaders\wireframe\wireframe.geom" />
     <None Include="src\shaders\wireframe\wireframe.frag" />
     <None Include="src\shaders\albedo\albedo.frag" />
+    <None Include="src\shaders\outline\outline.frag" />
+    <None Include="src\shaders\outline\outline.vert" />
   </ItemGroup>
 </Project>

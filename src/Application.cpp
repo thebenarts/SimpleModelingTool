@@ -141,7 +141,13 @@ int main(void)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 	glDepthFunc(GL_LESS);
+	//stencil testing
+	glEnable(GL_STENCIL_TEST);
+	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
 	glEnable(GL_CULL_FACE);
+
 
 	// Variables to be changed in the ImGUI window
 	bool bDirLightToggle = true;
@@ -163,6 +169,7 @@ int main(void)
 	ResourceManager::LoadShader("visNormals", "src/shaders/visualizeNormals/visualizeNormals.vert", "src/shaders/visualizeNormals/visualizeNormals.frag", "src/shaders/visualizeNormals/visualizeNormals.geom");
 	ResourceManager::LoadShader("guideGrid", "src/shaders/grid/gridGuide.vert", "src/shaders/grid/gridGuide.frag", nullptr);
 	ResourceManager::LoadShader("albedo", "src/shaders/DirLight/dirLight.vert", "src/shaders/albedo/albedo.frag", nullptr);
+	ResourceManager::LoadShader("outline", "src/shaders/outline/outline.vert", "src/shaders/outline/outline.frag", nullptr);
 	std::vector<std::string> shapes{ "PLANE", "CUBE", "SPHERE"};
 
 	//camera = new Camera(glm::vec3(-4.4f, 3.1f, 4.6f), glm::vec3(0.0f, 1.0f, 0.0f), -46.0f, -26.5f);
@@ -212,6 +219,7 @@ int main(void)
 	Shader* visNormals = ResourceManager::GetShader("visNormals");
 	Shader* guideGrid = ResourceManager::GetShader("guideGrid");
 	Shader* albedo = ResourceManager::GetShader("albedo");
+	Shader* outline = ResourceManager::GetShader("outline");
 	std::cout << ResourceManager::getResourceID() << std::endl;
 
 
@@ -260,13 +268,12 @@ int main(void)
 		// Specify the color of the background
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		// Clean the back buffer and assign the new color to it
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		processInput(window);
 		// Tell OpenGL a new frame is about to begin
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-
 
 		// try rendering to custom framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -277,41 +284,26 @@ int main(void)
 		glViewport(0, 0, SCREEN_RES_W, SCREEN_RES_H);
 
 		//--------------------------------------------------------------------------------------------------------------------------------
-
-
-
 		////DIRLIGHT
-		//// --------
 		//if (bDirLightToggle) {
 			//lightshade
 			albedo->Use();
-			//dirLight.setVec3("light.direction", glm::vec3(lightDirection[0], lightDirection[1], lightDirection[2]));
-			// I AM THE DIRLIGHT
-			albedo->setVec3("light.direction", glm::vec3(camera.Front));
-			albedo->setVec3("viewPos", camera.Position);
-					
+			albedo->setVec3("light.direction", glm::vec3(camera->Front));
+			albedo->setVec3("viewPos", camera->Position);
 			//light properties
 			albedo->setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
 			albedo->setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
 					
-
 		////bpModel.Draw(unlit);
-		Renderer::RenderScene();
-		
-
+		//Renderer::RenderScene();
 
 		 // bind Texture
 		glActiveTexture(GL_TEXTURE0);
 		albedoTexture.Bind();
 
-		Renderer::RenderScene(camera);
-		
+		Renderer::RenderScene();
 
-
-
-
-		//---------------------------------------------------------------------------------------------------------------------------------
-
+		//-------------------------------------------------------------------------------------------------------------------------------
 		//----------------------------------------------------------- IMGUI -------------------------------------------------------------
 
 		// set back to regular framebuffer
