@@ -26,7 +26,6 @@
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void renderShape();
 void renderPlane(); unsigned int planeVBO = 0, planeVAO = 0;
 void renderCube();	unsigned int cubeVAO = 0, cubeVBO = 0;
 void renderSphere();
@@ -50,7 +49,10 @@ bool bFirstMouse = true;
 bool bViewPortActive = true;
 int selectedShape = 1;
 
-float location[3] = { 0.0,0.0,0.0 };
+//float location[3] = { 0.0,0.0,0.0 };
+glm::vec3 location = glm::vec3(0.0f);
+glm::vec3 rotation = glm::vec3(0.0f);
+glm::vec3 scale = glm::vec3(1.0f);
 
 enum userState
 {
@@ -155,8 +157,8 @@ int main(void)
 	float size = 1.0f;
 	float color[4] = { 0.8f, 0.3f, 0.02f, 1.0f };
 	//TODO : encapsualte geometry data
-	float scale[3] = { 1.0,1.0,1.0 };
-	float rotation[3] = { 0.0,0.0,0.0 };
+	//float scale[3] = { 1.0,1.0,1.0 };
+	//float rotation[3] = { 0.0,0.0,0.0 };
 	//float lightDirection[3] = { -2.2, -4.0, -3.3 };
 
 	//Shader unlit("src/shaders/unlit/unlit.vert", "src/shaders/unlit/unlit.frag");
@@ -226,34 +228,8 @@ int main(void)
 	// --------------------------------- LOAD TEXTURE ----------------------------------------------
 	ResourceManager::LoadTexture2D("src/assets/images/container.png", true, "albedo");
 	Texture2D albedoTexture = ResourceManager::GetTexture2D("albedo");
-	//unsigned int albedoTexture;
-	//glGenTextures(1, &albedoTexture);
-	//glBindTexture(GL_TEXTURE_2D, albedoTexture);
-	//// set the texture wrapping parameters
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	//// set texture filtering parameters
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	//// load image, create texture and generate mipmaps
-	//int width, height, nrChannels;
-	//unsigned char* data = stbi_load(("src/assets/images/container.png"), &width, &height, &nrChannels, 0);
-	//if (data)
-	//{
-	//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-	//	glGenerateMipmap(GL_TEXTURE_2D);
-	//}
-	//else
-	//{
-	//	std::cout << "Failed to load texture" << std::endl;
-	//}
-	//stbi_image_free(data);
-	//albedo->Use();
-	//albedo->setInt("albedo", 0);
-	
 	// ==================================================================================================
 
-	Cube* cube = new Cube();
 	Renderer::SetCamera(camera);
 
 	// Main while loop
@@ -264,7 +240,7 @@ int main(void)
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
-	// ----------------------------------------------------------------- RENDER OPENGL----------------------------------------------------------------------
+		// ----------------------------------------------------------------- RENDER OPENGL----------------------------------------------------------------------
 		// Specify the color of the background
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		// Clean the back buffer and assign the new color to it
@@ -284,6 +260,17 @@ int main(void)
 		glViewport(0, 0, SCREEN_RES_W, SCREEN_RES_H);
 
 		//--------------------------------------------------------------------------------------------------------------------------------
+		Object* currentObject = ResourceManager::GetSelectedObject();
+		if (currentObject)
+		{
+			location = currentObject->GetObjectLocation();
+			rotation = currentObject->GetObjectRotation();
+
+			Cube* currentCube = static_cast<Cube*>(currentObject);
+			if (currentCube)
+				scale = currentCube->GetCubeScale();
+		}
+
 		////DIRLIGHT
 		//if (bDirLightToggle) {
 			//lightshade
@@ -295,13 +282,17 @@ int main(void)
 			albedo->setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
 					
 		////bpModel.Draw(unlit);
-		//Renderer::RenderScene();
+		Renderer::RenderScene();
+		
 
-		 // bind Texture
+
+		// bind Texture
 		glActiveTexture(GL_TEXTURE0);
 		albedoTexture.Bind();
 
 		Renderer::RenderScene();
+
+		//---------------------------------------------------------------------------------------------------------------------------------
 
 		//-------------------------------------------------------------------------------------------------------------------------------
 		//----------------------------------------------------------- IMGUI -------------------------------------------------------------
@@ -313,7 +304,7 @@ int main(void)
 		// Clean the back buffer and assign the new color to it
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glViewport(0, 0, SRC_WIDTH, SRC_HEIGHT);
-		
+
 
 		// -----------------------------------------------CREATE THE MAIN IMGUI WINDOW THAT ALL OTHER WINDOWS WILL BE DOCKED IN----------------------------------------
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
@@ -342,15 +333,31 @@ int main(void)
 		// Lighd Direction
 		//ImGui::DragFloat3("Light Direction", lightDirection);
 		// Slider that appears in the window
-		ImGui::SliderFloat("Size", &size, 0.5f, 2.0f);
+		ImGui::SliderFloat("Size", &scale[0], 0.5f, 2.0f);
 		// Fancy color editor that appears in the window
 		ImGui::ColorEdit4("Color", color);
 		// Fancy editor Position
-		ImGui::DragFloat3("Location", location);
+		if (ImGui::DragFloat3("Location", &location[0]))
+		{
+			if (currentObject)
+				currentObject->SetObjectLocation(location);
+		}
 		// Fancy editor Scale
-		ImGui::DragFloat3("Scale", scale);
+		if (ImGui::DragFloat3("Scale", &scale[0]))
+		{
+			if (currentObject)
+			{
+				Cube* currentCube = static_cast<Cube*>(currentObject);
+				if (currentCube)
+					currentCube->SetCubeScale(scale);
+			}
+		}
 		// Fancy editor Rotation
-		ImGui::DragFloat3("Rotation", rotation);
+		if (ImGui::DragFloat3("Rotation", &rotation[0]))
+		{
+			if (currentObject)
+				currentObject->SetObjectRotation(rotation);
+		}
 		// Ends the window
 
 		ImGui::End();
@@ -367,8 +374,6 @@ int main(void)
 					{
 						selectedShape = i;
 						std::cout << selectedShape << std::endl;
-						/*Cube* cObject = new Cube();
-						ResourceManager::objectMap[ResourceManager::getResourceID()] = static_cast<Object*>(cObject);*/
 						ResourceManager::CreateCube();
 					}
 
@@ -523,20 +528,6 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 	{
 		xoffset *= 0.1f;
 		location[0] += xoffset;
-	}
-}
-void renderShape()
-{
-	switch (selectedShape)
-	{
-	case 0:
-	{
-		Cube* cObject = new Cube();
-		ResourceManager::objectMap[ResourceManager::getResourceID()] = static_cast<Object*>(cObject);
-	}
-		break;
-	default:
-		break;
 	}
 }
 
