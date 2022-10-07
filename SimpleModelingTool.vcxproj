@@ -204,6 +204,7 @@
     <ClInclude Include="src\vendor\imgui\include\imstb_truetype.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\shaders\albedo\albedo.frag" />
     <None Include="src\shaders\DirLight\dirLight.vert" />
     <None Include="src\shaders\DirLight\dirLight.frag" />
     <None Include="src\shaders\grid\gridGuide.frag" />

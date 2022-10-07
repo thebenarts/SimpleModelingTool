@@ -76,37 +76,37 @@ Shader* ResourceManager::loadShaderFromFile(const char* vShaderFile, const char*
 }
 
 
-//Texture2D& ResourceManager::GetTexture2D(std::string name)
-//{
-//	return texture2DMap[name];
-//}
-//
-//Texture2D ResourceManager::LoadTexture2D(const char* file, bool alpha, std::string name)
-//{
-//	texture2DMap[name] = loadTextureFromFile(file, alpha);
-//	return texture2DMap[name];
-//}
-//
-//Texture2D ResourceManager::loadTextureFromFile(const char* file, bool alpha)
-//{
-//	// create texture object
-//	Texture2D texture;
-//	if (alpha)
-//	{
-//		texture.Internal_Format = GL_RGBA;
-//		texture.Image_Format = GL_RGBA;
-//	}
-//
-//	// load image 
-//	int width, height, nrChannels;
-//	unsigned char* data = stbi_load(file, &width, &height, &nrChannels, 0);
-//	// now generate texture
-//	texture.Generate(width, height, data);
-//	// free image data
-//	stbi_image_free(data);
-//
-//	return texture;
-//}
+Texture2D& ResourceManager::GetTexture2D(std::string name)
+{
+	return texture2DMap[name];
+}
+
+Texture2D ResourceManager::LoadTexture2D(const char* file, bool alpha, std::string name)
+{
+	texture2DMap[name] = loadTextureFromFile(file, alpha);
+	return texture2DMap[name];
+}
+
+Texture2D ResourceManager::loadTextureFromFile(const char* file, bool alpha)
+{
+	// create texture object
+	Texture2D texture;
+	if (alpha)
+	{
+		texture.Internal_Format = GL_RGBA;
+		texture.Image_Format = GL_RGBA;
+	}
+
+	// load image 
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load(file, &width, &height, &nrChannels, 0);
+	// now generate texture
+	texture.Generate(width, height, data);
+	// free image data
+	stbi_image_free(data);
+
+	return texture;
+}
 
 void ResourceManager::Clear()
 {

@@ -5,7 +5,7 @@ glm::mat4 Renderer::projection = glm::perspective(glm::radians(90.f), (float)256
 
 void Renderer::RenderScene(Camera& camera)
 {
-	Shader* dirLight = ResourceManager::GetShader("dirLight");
+	Shader* dirLight = ResourceManager::GetShader("albedo");
 	if (!dirLight)
 	{
 		std::cout << "SHADER::ERROR:: MISSING SHADER: IN RENDERER" << std::endl;

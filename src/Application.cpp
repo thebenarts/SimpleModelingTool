@@ -162,7 +162,7 @@ int main(void)
 	ResourceManager::LoadShader("dirLight", "src/shaders/DirLight/dirLight.vert", "src/shaders/DirLight/dirLight.frag", nullptr);
 	ResourceManager::LoadShader("visNormals", "src/shaders/visualizeNormals/visualizeNormals.vert", "src/shaders/visualizeNormals/visualizeNormals.frag", "src/shaders/visualizeNormals/visualizeNormals.geom");
 	ResourceManager::LoadShader("guideGrid", "src/shaders/grid/gridGuide.vert", "src/shaders/grid/gridGuide.frag", nullptr);
-
+	ResourceManager::LoadShader("albedo", "src/shaders/DirLight/dirLight.vert", "src/shaders/albedo/albedo.frag", nullptr);
 	std::vector<std::string> shapes{ "PLANE", "CUBE", "SPHERE"};
 
 	//--------------------ASSIMP-------------------
@@ -209,7 +209,39 @@ int main(void)
 	Shader* dirLight = ResourceManager::GetShader("dirLight");
 	Shader* visNormals = ResourceManager::GetShader("visNormals");
 	Shader* guideGrid = ResourceManager::GetShader("guideGrid");
+	Shader* albedo = ResourceManager::GetShader("albedo");
 	std::cout << ResourceManager::getResourceID() << std::endl;
+
+
+	// --------------------------------- LOAD TEXTURE ----------------------------------------------
+	ResourceManager::LoadTexture2D("src/assets/images/container.png", true, "albedo");
+	Texture2D albedoTexture = ResourceManager::GetTexture2D("albedo");
+	//unsigned int albedoTexture;
+	//glGenTextures(1, &albedoTexture);
+	//glBindTexture(GL_TEXTURE_2D, albedoTexture);
+	//// set the texture wrapping parameters
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	//// set texture filtering parameters
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//// load image, create texture and generate mipmaps
+	//int width, height, nrChannels;
+	//unsigned char* data = stbi_load(("src/assets/images/container.png"), &width, &height, &nrChannels, 0);
+	//if (data)
+	//{
+	//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	//	glGenerateMipmap(GL_TEXTURE_2D);
+	//}
+	//else
+	//{
+	//	std::cout << "Failed to load texture" << std::endl;
+	//}
+	//stbi_image_free(data);
+	//albedo->Use();
+	//albedo->setInt("albedo", 0);
+	
+	// ==================================================================================================
 
 	Cube* cube = new Cube();
 	// Main while loop
@@ -262,20 +294,20 @@ int main(void)
 		////DIRLIGHT
 		//// --------
 		//if (bDirLightToggle) {
-		//	//lightshade
-		//	dirLight->Use();
-		//	//dirLight.setVec3("light.direction", glm::vec3(lightDirection[0], lightDirection[1], lightDirection[2]));
-		//	// I AM THE DIRLIGHT
-		//	dirLight->setVec3("light.direction", glm::vec3(camera.Front));
-		//	dirLight->setVec3("viewPos", camera.Position);
-		//			
-		//	//light properties
-		//	dirLight->setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
-		//	dirLight->setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
-		//			
-		//	dirLight->setMat4("projection", projection);
-		//	dirLight->setMat4("view", view);
-		//	dirLight->setMat4("model", model);
+			//lightshade
+			albedo->Use();
+			//dirLight.setVec3("light.direction", glm::vec3(lightDirection[0], lightDirection[1], lightDirection[2]));
+			// I AM THE DIRLIGHT
+			albedo->setVec3("light.direction", glm::vec3(camera.Front));
+			albedo->setVec3("viewPos", camera.Position);
+					
+			//light properties
+			albedo->setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+			albedo->setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+					
+			//dirLight->setMat4("projection", projection);
+			//dirLight->setMat4("view", view);
+			//dirLight->setMat4("model", model);
 		//}
 
 
@@ -298,6 +330,9 @@ int main(void)
 		//	visNormals->setMat4("projection", projection);
 		//	renderShape();
 		//}
+		 // bind Texture
+		glActiveTexture(GL_TEXTURE0);
+		albedoTexture.Bind();
 
 		Renderer::RenderScene(camera);
 		
