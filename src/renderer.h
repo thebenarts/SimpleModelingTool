@@ -13,9 +13,22 @@ enum RENDERSTATE
 class Renderer {
 public:
 
-	RENDERSTATE renderState;
+	static RENDERSTATE renderState;
 
-	static void RenderScene(Camera& camera);
+	static void SetCamera(Camera* camera);
 
-	static glm::mat4 projection; 
+	static void RenderScene();
+
+	static void InitGrid();
+
+	static void RenderGrid();
+
+protected:
+
+	static unsigned int gridVAO, gridVBO;
+	static Camera* currentCamera;
+
+	static glm::mat4 projection;
+
+	static glm::mat4 view;
 };

@@ -15,6 +15,12 @@ enum Camera_Movement
 	RIGHT
 };
 
+enum Camera_ProjectionMode
+{
+	PERSPECTIVE,
+	ORTHOGRAPHIC
+};
+
 // Default camera values
 const float YAW = -90.f;
 const float PITCH = 0.0f;
@@ -33,6 +39,7 @@ public:
 	glm::vec3 Up;
 	glm::vec3 Right;
 	glm::vec3 WorldUp;
+	glm::mat4 projectionMatrice;
 
 	// euler Angles 
 	float Yaw;
@@ -42,31 +49,68 @@ public:
 	float MovementSpeed;
 	float MouseSensitivity;
 	float FieldOfView;
+	float nearPlane;
+	float farPlane;
+	unsigned int screenWidth;
+	unsigned int screenHeight;
+
+	Camera_ProjectionMode lensType;
 
 	// constructor with vectors
 	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) :
 		Front(glm::vec3(0.0f, 0.0f, -1.0f)),
 		MovementSpeed(SPEED),
 		MouseSensitivity(SENSITIVITY),
-		FieldOfView(ZOOM)
+		FieldOfView(ZOOM),
+		nearPlane(0.1f),
+		farPlane(100.f),
+		screenWidth(2560),
+		screenHeight(1440),
+		lensType(PERSPECTIVE)
 	{
 		Position = position;
 		WorldUp = up;
 		Yaw = yaw;
 		Pitch = pitch;
+		UpdateCameraProjectionMatrix();
 		UpdateCameraVectors();
 	}
 
-	Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) :
+	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), unsigned int scrWidth = 2560, unsigned int scrHeight = 1440, float nearP = 0.1f, float farP = 100.f, Camera_ProjectionMode projectionType = PERSPECTIVE, glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) :
 		Front(glm::vec3(0.0f, 0.0f, -1.0f)),
 		MovementSpeed(SPEED),
 		MouseSensitivity(SENSITIVITY),
-		FieldOfView(ZOOM)
+		FieldOfView(ZOOM),
+		nearPlane(nearP),
+		farPlane(farP),
+		screenWidth(scrWidth),
+		screenHeight(scrHeight),
+		lensType(projectionType)
+	{
+		Position = position;
+		WorldUp = up;
+		Yaw = yaw;
+		Pitch = pitch;
+		UpdateCameraProjectionMatrix();
+		UpdateCameraVectors();
+	}
+
+	Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch , unsigned int scrWidth, unsigned int scrHeight, float nearP , float farP, Camera_ProjectionMode projectionType ) :
+		Front(glm::vec3(0.0f, 0.0f, -1.0f)),
+		MovementSpeed(SPEED),
+		MouseSensitivity(SENSITIVITY),
+		FieldOfView(ZOOM),
+		nearPlane(nearP),
+		farPlane(farP),
+		screenWidth(scrWidth),
+		screenHeight(scrHeight),
+		lensType(projectionType)
 	{
 		Position = glm::vec3(posX, posY, posZ);
 		WorldUp = glm::vec3(upX, upY, upZ);
 		Yaw = yaw;
 		Pitch = pitch;
+		UpdateCameraProjectionMatrix();
 		UpdateCameraVectors();
 	}
 
@@ -76,6 +120,18 @@ public:
 		return glm::lookAt(Position, Position + Front, Up);
 	}
 
+	glm::mat4 GetProjectionMatrix()
+	{
+		return projectionMatrice;
+	}
+
+	void UpdateCameraProjectionMatrix()
+	{
+		if (lensType == PERSPECTIVE)
+			projectionMatrice = glm::perspective(FieldOfView, (float)screenWidth / (float)screenHeight, nearPlane, farPlane);
+		else
+			projectionMatrice = glm::ortho(0.0f, (float)screenWidth, 0.0f, (float)screenHeight);
+	}
 	// processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM( to abstract it from windowing system
 	void ProcessKeyboard(Camera_Movement direction, float deltaTime)
 	{
@@ -120,6 +176,15 @@ public:
 			FieldOfView = 1.0f;
 		if (FieldOfView > 100.f)
 			FieldOfView = 100.f;
+
+		if(lensType == PERSPECTIVE)
+		UpdateCameraProjectionMatrix();
+	}
+
+	void setLensType(Camera_ProjectionMode mode)
+	{
+		lensType = mode;
+		UpdateCameraProjectionMatrix();
 	}
 
 private:

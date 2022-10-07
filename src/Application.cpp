@@ -43,7 +43,7 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 // Camera
-Camera camera(glm::vec3(-4.4f, 3.1f, 4.6f), glm::vec3(0.0f, 1.0f, 0.0f), -46.0f, -26.5f);
+Camera* camera = new Camera(glm::vec3(-4.4f, 3.1f, 4.6f), glm::vec3(0.0f, 1.0f, 0.0f), -46.0f, -26.5f);
 
 float lastX = (float)SRC_WIDTH / 2.f, lastY = (float)SRC_HEIGHT / 2.f;
 bool bFirstMouse = true;
@@ -165,6 +165,8 @@ int main(void)
 	ResourceManager::LoadShader("albedo", "src/shaders/DirLight/dirLight.vert", "src/shaders/albedo/albedo.frag", nullptr);
 	std::vector<std::string> shapes{ "PLANE", "CUBE", "SPHERE"};
 
+	//camera = new Camera(glm::vec3(-4.4f, 3.1f, 4.6f), glm::vec3(0.0f, 1.0f, 0.0f), -46.0f, -26.5f);
+
 	//--------------------ASSIMP-------------------
 	//Model bpModel("src/assets/backpack/backpack.obj");
 
@@ -244,6 +246,8 @@ int main(void)
 	// ==================================================================================================
 
 	Cube* cube = new Cube();
+	Renderer::SetCamera(camera);
+
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -274,22 +278,7 @@ int main(void)
 
 		//--------------------------------------------------------------------------------------------------------------------------------
 
-		//glm::mat4 projection = glm::perspective(glm::radians(camera.FieldOfView), (float)SCREEN_RES_W / (float)SCREEN_RES_H, 0.1f, 100.f);
-		//glm::mat4 view = camera.GetViewMatrix();
-		//glm::mat4 model = glm::mat4(1.0f);
 
-		//model = glm::mat4(1.0f);
-		//model = glm::translate(model, glm::vec3(location[0], location[1], location[2]));
-		//model = glm::scale(model, glm::vec3(scale[0], scale[1], scale[2]));
-		//model = glm::rotate(model, glm::radians(rotation[0]), glm::vec3(1, 0, 0));
-		//model = glm::rotate(model, glm::radians(rotation[1]), glm::vec3(0, 1, 0));
-		//model = glm::rotate(model, glm::radians(rotation[2]), glm::vec3(0, 0, 1));
-
-		//// use shader
-		//unlit->Use();
-		//unlit->setMat4("projection", projection);
-		//unlit->setMat4("view", view);
-		//unlit->setMat4("model", model);
 
 		////DIRLIGHT
 		//// --------
@@ -305,61 +294,20 @@ int main(void)
 			albedo->setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
 			albedo->setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
 					
-			//dirLight->setMat4("projection", projection);
-			//dirLight->setMat4("view", view);
-			//dirLight->setMat4("model", model);
-		//}
 
-
-		//// set matrice information in shader
-		//
-
-		//// Draw Backpack model with dirlight shader
-		//// ----------------------------------------
-		//
 		////bpModel.Draw(unlit);
+		Renderer::RenderScene();
+		
 
-		//renderShape();
 
-		////--------------------------	vis Normals
-		//if (bVertexNormalToggle)
-		//{
-		//	visNormals->Use();
-		//	visNormals->setMat4("view", view);
-		//	visNormals->setMat4("model", model);
-		//	visNormals->setMat4("projection", projection);
-		//	renderShape();
-		//}
 		 // bind Texture
 		glActiveTexture(GL_TEXTURE0);
 		albedoTexture.Bind();
 
 		Renderer::RenderScene(camera);
 		
-		//glm::mat4 projection = glm::perspective(glm::radians(camera.FieldOfView), (float)SCREEN_RES_W / (float)SCREEN_RES_H, 0.1f, 100.f);
-		//glm::mat4 view = camera.GetViewMatrix();
-		//glm::mat4 model = glm::mat4(1.0f);
-		//dirLight->Use();
-		////dirLight.setVec3("light.direction", glm::vec3(lightDirection[0], lightDirection[1], lightDirection[2]));
-		//// I AM THE DIRLIGHT
-		//dirLight->setVec3("light.direction", glm::vec3(camera.Front));
-		//dirLight->setVec3("viewPos", camera.Position);
-		//			
-		////light properties
-		//dirLight->setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
-		//dirLight->setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
-		//			
-		//dirLight->setMat4("projection", projection);
-		//dirLight->setMat4("view", view);
-		//dirLight->setMat4("model", model);
 
-		//cube->Draw(dirLight);
-		glm::mat4 view = camera.GetViewMatrix();
-		glm::mat4 projection = glm::perspective(glm::radians(90.f), (float)2560 / (float)1440, 0.1f, 100.f);
-		guideGrid->Use();
-		guideGrid->setMat4("projection", projection);
-		guideGrid->setMat4("view", view);
-		renderPlane();
+
 
 
 		//---------------------------------------------------------------------------------------------------------------------------------
@@ -427,8 +375,9 @@ int main(void)
 					{
 						selectedShape = i;
 						std::cout << selectedShape << std::endl;
-						Cube* cObject = new Cube();
-						ResourceManager::objectMap[ResourceManager::getResourceID()] = static_cast<Object*>(cObject);
+						/*Cube* cObject = new Cube();
+						ResourceManager::objectMap[ResourceManager::getResourceID()] = static_cast<Object*>(cObject);*/
+						ResourceManager::CreateCube();
 					}
 
 					ImGui::PopID();
@@ -491,7 +440,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 }
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-	camera.ProcessMouseScroll(static_cast<float>(yoffset));
+	camera->ProcessMouseScroll(static_cast<float>(yoffset));
 }
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -519,16 +468,16 @@ void processInput(GLFWwindow* window)
 		if (uState == Normal)
 		{
 			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-				camera.ProcessKeyboard(FORWARD, deltaTime);
+				camera->ProcessKeyboard(FORWARD, deltaTime);
 
 			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-				camera.ProcessKeyboard(BACKWARD, deltaTime);
+				camera->ProcessKeyboard(BACKWARD, deltaTime);
 
 			if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-				camera.ProcessKeyboard(LEFT, deltaTime);
+				camera->ProcessKeyboard(LEFT, deltaTime);
 
 			if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-				camera.ProcessKeyboard(RIGHT, deltaTime);
+				camera->ProcessKeyboard(RIGHT, deltaTime);
 
 			if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
 			{
@@ -575,7 +524,7 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 
 	if (uState == Normal && bViewPortActive)
 	{
-		camera.ProcessMouseMovement(xoffset, yoffset);
+		camera->ProcessMouseMovement(xoffset, yoffset);
 	}
 
 	if (uState == Move && bViewPortActive)

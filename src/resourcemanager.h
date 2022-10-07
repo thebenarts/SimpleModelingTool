@@ -23,6 +23,8 @@ class ResourceManager
 public:
 	// unique ID incremented on every object creation
 	static unsigned int resourceID;
+	// currently selected ID
+	static unsigned int selectedID;
 	// resource storage
 	static std::map<std::string, Shader*> shadersMap;
 	static std::map<std::string, Texture2D> texture2DMap;
@@ -40,6 +42,8 @@ public:
 	static void Clear();
 	
 	static unsigned int getResourceID() { return resourceID++; }
+
+	static unsigned int getSelectedID() { return selectedID; }
 
 	static void CreateCube();
 
