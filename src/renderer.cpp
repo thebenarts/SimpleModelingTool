@@ -39,6 +39,9 @@ void Renderer::RenderScene()
 
 	for (std::pair<const unsigned int, Object*>& currentObject : ResourceManager::objectMap)
 	{
+		//if (!currentObject.second)
+			//continue;
+
 		if (currentObject.second->bVisibility)
 			currentObject.second->Draw(dirLight);
 	}

@@ -45,3 +45,13 @@ void Cube::Draw(Shader* shader) {
 
 
 }
+
+void Cube::SetCubeScale(glm::vec3 newScale)
+{
+	scale = newScale;
+}
+
+glm::vec3 Cube::GetCubeScale()
+{
+	return scale;
+}

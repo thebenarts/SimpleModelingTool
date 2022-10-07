@@ -13,6 +13,8 @@ public:
 	unsigned int VAO;
 	unsigned int VBO;
 
+	glm::vec3 GetCubeScale();
+	void SetCubeScale(glm::vec3 newScale);
 
 	void Draw(Shader* shader) override;
 

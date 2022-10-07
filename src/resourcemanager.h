@@ -41,9 +41,13 @@ public:
 	// properly de-allocates all loaded resources
 	static void Clear();
 	
-	static unsigned int getResourceID() { return resourceID++; }
+	static unsigned int GetResourceID() { return resourceID++; }
 
-	static unsigned int getSelectedID() { return selectedID; }
+	static unsigned int GetSelectedID() { return selectedID; }
+
+	static Object* GetSelectedObject();
+
+	static unsigned int SelectNextObject();
 
 	static void CreateCube();
 
@@ -56,4 +60,6 @@ private:
 
 	// loads a single texture from file
 	static Texture2D loadTextureFromFile(const char* file, bool alpha);
+
+	static unsigned int FindNextObjectID();
 };
