@@ -1,5 +1,6 @@
 #include "renderer.h"
 #include "resourcemanager.h"
+#include "simpleModel.h"
 
 glm::mat4 Renderer::projection;
 glm::mat4 Renderer::view;
@@ -37,16 +38,58 @@ void Renderer::RenderScene()
 	dirLight->setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
 	dirLight->setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
 
+
+	Shader* outline = ResourceManager::GetShader("outline");
+	if (!outline)
+	{
+		std::cout << "SHADER::ERROR:: MISSING SHADER: IN RENDERER" << std::endl;
+		return;
+	}
+
+
+	glStencilFunc(GL_ALWAYS, 1, 0xFF);
+	glStencilMask(0xFF);
 	for (std::pair<const unsigned int, Object*>& currentObject : ResourceManager::objectMap)
 	{
 		//if (!currentObject.second)
 			//continue;
 
-		if (currentObject.second->bVisibility)
+		if (currentObject.second->bVisibility){
 			currentObject.second->Draw(dirLight);
+			if (currentObject.second->bSelected) {
+				Cube* selected = static_cast<Cube*>(currentObject.second);
+				if (selected) {
+					// save data
+					glm::vec3 pLocation = selected->GetObjectLocation();
+					glm::vec3 pRotation = selected->GetObjectRotation();
+					glm::vec3 pScale = selected->GetCubeScale();
+					// increase scale of selection to render as outline
+					selected->SetCubeScale(pScale * glm::vec3(1.02f));
+
+					outline->Use();
+					outline->setMat4("projection", Renderer::projection);
+					outline->setMat4("view", Renderer::view);
+					// set stencil
+					glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+					glStencilMask(0x00);
+					glDisable(GL_DEPTH_TEST);
+
+					selected->Draw(outline);
+					// set scale back to original
+					selected->SetCubeScale(pScale);
+					glEnable(GL_DEPTH_TEST);
+				}
+			}
+		}
 	}
 
+	//Renderer::RenderGrid();
+	
 	Renderer::RenderGrid();
+
+	glStencilMask(0xFF);
+	glStencilFunc(GL_ALWAYS, 0, 0xFF);
+	glEnable(GL_DEPTH_TEST);
 }
 
 void Renderer::InitGrid()

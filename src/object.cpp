@@ -11,6 +11,7 @@ bVisibility(true)
 
 void Object::Draw(Shader* shader) {}
 
+
 glm::vec3 Object::GetObjectLocation()
 {
 	return location;
@@ -30,3 +31,4 @@ void Object::SetObjectRotation(glm::vec3 newRotation)
 {
 	rotation = newRotation;
 }
+

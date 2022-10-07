@@ -222,7 +222,7 @@ int main(void)
 	Shader* guideGrid = ResourceManager::GetShader("guideGrid");
 	Shader* albedo = ResourceManager::GetShader("albedo");
 	Shader* outline = ResourceManager::GetShader("outline");
-	std::cout << ResourceManager::getResourceID() << std::endl;
+	
 
 
 	// --------------------------------- LOAD TEXTURE ----------------------------------------------
@@ -241,10 +241,7 @@ int main(void)
 		lastFrame = currentFrame;
 
 		// ----------------------------------------------------------------- RENDER OPENGL----------------------------------------------------------------------
-		// Specify the color of the background
-		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-		// Clean the back buffer and assign the new color to it
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
 		processInput(window);
 		// Tell OpenGL a new frame is about to begin
 		ImGui_ImplOpenGL3_NewFrame();
@@ -256,7 +253,7 @@ int main(void)
 		// Specify the color of the background
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		// Clean the back buffer and assign the new color to it
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		glViewport(0, 0, SCREEN_RES_W, SCREEN_RES_H);
 
 		//--------------------------------------------------------------------------------------------------------------------------------
@@ -302,7 +299,7 @@ int main(void)
 		// Specify the color of the background
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		// Clean the back buffer and assign the new color to it
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 		glViewport(0, 0, SRC_WIDTH, SRC_HEIGHT);
 
 
