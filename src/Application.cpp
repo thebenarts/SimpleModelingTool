@@ -450,6 +450,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		else
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
+
+	if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS)
+		ResourceManager::SelectNextObject();
 }
 void processInput(GLFWwindow* window)
 {
