@@ -1,6 +1,6 @@
 #version 330 core
 layout (location = 0) out vec4 FragColor;
-layout (location = 1) out vec4 selectionID;
+layout (location = 1) out int selectionID;
 //out vec4 FragColor;
 
 in VS_OUT{
@@ -71,5 +71,5 @@ void main()
 	//FragColor = vec4(vec3(fading),1.0);
 	FragColor =(grid(fragPos3D, 1) + grid(fragPos3D, 0.2))* float(t > 0);
 	FragColor.a *= fading;
-	selectionID = vec4(0.0);
+	selectionID = 0;
 }

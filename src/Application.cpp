@@ -47,13 +47,18 @@ Camera* camera = new Camera(glm::vec3(-4.4f, 3.1f, 4.6f), glm::vec3(0.0f, 1.0f, 
 float lastX = (float)SRC_WIDTH / 2.f, lastY = (float)SRC_HEIGHT / 2.f;
 bool bFirstMouse = true;
 bool bViewPortActive = true;
+
 int selectedShape = 1;
+int selectedID = 0;
 
 bool bLeftMouseButton = false;
 //float location[3] = { 0.0,0.0,0.0 };
 glm::vec3 location = glm::vec3(0.0f);
 glm::vec3 rotation = glm::vec3(0.0f);
 glm::vec3 scale = glm::vec3(1.0f);
+
+glm::vec2 viewportSize;
+glm::vec2 viewportBounds[2];
 
 unsigned int colorRender = 0;
 
@@ -202,7 +207,7 @@ int main(void)
 	unsigned int selectionColorBuffer;
 	glGenTextures(1, &selectionColorBuffer);
 	glBindTexture(GL_TEXTURE_2D, selectionColorBuffer);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCREEN_RES_W, SCREEN_RES_H,0, GL_RGBA, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, SCREEN_RES_W, SCREEN_RES_H,0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -273,8 +278,8 @@ int main(void)
 		// try rendering to custom framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 		// Specify the color of the background
-		//glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-		glClearColor(0.0, 0.0, 0.0, 1.0);
+		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+		//glClearColor(0.0, 0.0, 0.0, 1.0);
 		// Clean the back buffer and assign the new color to it
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		glViewport(0, 0, SCREEN_RES_W, SCREEN_RES_H);
@@ -433,49 +438,98 @@ int main(void)
 
 	if (ImGui::Begin("ViewPortTest",&bf , ImGuiWindowFlags_NoScrollbar))
 	{
-		ImVec2 workSize = { ImGui::GetWindowWidth(), ImGui::GetWindowHeight() };
-		ImVec2 workPos = ImGui::GetWindowPos();
-		ImVec2 mousePos = ImGui::GetMousePos();
 
-		//std::cout << workPos.x << " " << workPos.y << std::endl;
-		//std::cout << "OG" << mousePos.x << " " << mousePos.y << std::endl;
-		mousePos.x -= workPos.x;
-		mousePos.y -= workPos.y;
+		ImVec2 viewportOffset = ImGui::GetCursorPos();
 
-		//std::cout << workSize.x << " " << workSize.y << std::endl;
+		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
+		viewportSize = { viewportPanelSize.x, viewportPanelSize.y };
 
-		if ( mousePos.x <= workSize.x && mousePos.y <= workSize.y)
-		{
+		//ImVec2 workSize = { ImGui::GetWindowWidth(), ImGui::GetWindowHeight() };
+		//ImVec2 workPos = ImGui::GetWindowPos();
+		//ImVec2 mousePos = ImGui::GetMousePos();
 
-			float scaleX = 2560.0 / workSize.x;
-			float scaleY = 1440.0 / workSize.y;
-			//std::cout << "-Window" << mousePos.x << " " << mousePos.y << std::endl;
-			mousePos.x *= scaleX;
-			mousePos.y *= scaleY;
-			//std::cout << "Scaled" << mousePos.x << " " << mousePos.y << std::endl;
+		////std::cout << workPos.x << " " << workPos.y << std::endl;
+		////std::cout << "OG" << mousePos.x << " " << mousePos.y << std::endl;
+		//mousePos.x -= workPos.x;
+		//mousePos.y -= workPos.y;
+
+		////std::cout << workSize.x << " " << workSize.y << std::endl;
+
+		//if ( mousePos.x <= workSize.x && mousePos.y <= workSize.y)
+		//{
+
+		//	float scaleX = 2560.0 / workSize.x;
+		//	float scaleY = 1440.0 / workSize.y;
+		//	//std::cout << "-Window" << mousePos.x << " " << mousePos.y << std::endl;
+		//	mousePos.x *= scaleX;
+		//	mousePos.y *= scaleY;
+		//	//std::cout << "Scaled" << mousePos.x << " " << mousePos.y << std::endl;
+
+		//	// Handle the picking
+		//	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+		//	glReadBuffer(GL_COLOR_ATTACHMENT1);
+		//	glm::vec3 pColor(0.0f);
+		//	//std::cout << mousePos.x << " " << mousePos.y << std::endl;
+		//	glReadPixels(mousePos.x, mousePos.y, 1, 1, GL_RGB, GL_FLOAT, &pColor[0]);
+
+		//	float selColor = pColor[0];
+		//	selColor *= 100.f;
+		//	selColor = trunc(selColor);
+		//	int selID = (int)selColor;
+		//	std::cout << selID << std::endl;
+		//	//ResourceManager::SelectObject(selID);
+
+		//	glReadBuffer(GL_NONE);
+		//	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+		//}
+
+		if(colorRender == 0)
+			ImGui::Image((ImTextureID)textureColorBuffer,ImVec2(viewportSize.x, viewportSize.y),ImVec2(0,1),ImVec2(1,0));
+		else
+			ImGui::Image((ImTextureID)selectionColorBuffer, ImVec2(viewportSize.x, viewportSize.y), ImVec2(0, 1), ImVec2(1, 0));
+
+		ImVec2 windowSize = ImGui::GetWindowSize();
+		ImVec2 minBound = ImGui::GetWindowPos();
+
+		minBound.x += viewportOffset.x;
+		minBound.y += viewportOffset.y;
+
+		ImVec2 maxBound = { minBound.x + windowSize.x, minBound.y + windowSize.y };
+		viewportBounds[0] = { minBound.x, minBound.y };
+		viewportBounds[1] = { maxBound.x, maxBound.y };
+
+		ImVec2 mp = ImGui::GetMousePos();
+		glm::vec2 mousePos{ mp.x,mp.y };
+		mousePos.x -= viewportBounds[0].x;
+		mousePos.y -= viewportBounds[0].y;
+		glm::vec2 viewportSize = viewportBounds[1] - viewportBounds[0];
+		mousePos.y = viewportSize.y - mousePos.y;		// flip y since openGL starts from bottom left instead of top left
+
+		float scaleX = 2560.0 / viewportSize.x;
+		float scaleY = 1440.0 / viewportSize.y;
+		mousePos.x *= scaleX;
+		mousePos.y *= scaleY;
+		
+		//std::cout << mousePos.x << " " << mousePos.y << std::endl;
+		//std::cout << "min" << viewportBounds[0].x << " " << viewportBounds[0].y << std::endl;
+		//std::cout << "max" << viewportBounds[1].x << " " << viewportBounds[1].y << std::endl;
 
 			// Handle the picking
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
 			glReadBuffer(GL_COLOR_ATTACHMENT1);
-			glm::vec3 pColor(0.0f);
+			int pColor;
 			//std::cout << mousePos.x << " " << mousePos.y << std::endl;
-			glReadPixels(mousePos.x, mousePos.y, 1, 1, GL_RGB, GL_FLOAT, &pColor[0]);
+			glReadPixels(mousePos.x, mousePos.y, 1, 1, GL_RED_INTEGER, GL_INT, &pColor);
 
-			float selColor = pColor[0];
-			selColor *= 100.f;
-			selColor = trunc(selColor);
-			int selID = (int)selColor;
-			std::cout << selID << std::endl;
+
+			std::cout << pColor << std::endl;
 			//ResourceManager::SelectObject(selID);
 
 			glReadBuffer(GL_NONE);
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-		}
 
-		if(colorRender == 0)
-		ImGui::Image((ImTextureID)textureColorBuffer,workSize,ImVec2(0,1),ImVec2(1,0));
-		else
-			ImGui::Image((ImTextureID)selectionColorBuffer, workSize, ImVec2(0, 1), ImVec2(1, 0));
+			
+			ResourceManager::SelectObject(pColor);
 
 		ImGui::End();
 	}
@@ -556,8 +610,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	if (!bViewPortActive)
 	{
-		if (glfwGetKey(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
-			bLeftMouseButton = true;
+		if (glfwGetKey(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS && selectedID != 0)
+			ResourceManager::SelectObject(selectedID);
 		if (glfwGetKey(window, GLFW_MOUSE_BUTTON_1) == GLFW_RELEASE)
 			bLeftMouseButton = false;
 	}
