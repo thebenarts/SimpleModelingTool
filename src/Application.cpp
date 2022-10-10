@@ -49,6 +49,7 @@ bool bFirstMouse = true;
 bool bViewPortActive = true;
 int selectedShape = 1;
 
+bool bLeftMouseButton = false;
 //float location[3] = { 0.0,0.0,0.0 };
 glm::vec3 location = glm::vec3(0.0f);
 glm::vec3 rotation = glm::vec3(0.0f);
@@ -201,9 +202,11 @@ int main(void)
 	unsigned int selectionColorBuffer;
 	glGenTextures(1, &selectionColorBuffer);
 	glBindTexture(GL_TEXTURE_2D, selectionColorBuffer);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCREEN_RES_W, SCREEN_RES_H,0, GL_RGBA, GL_UNSIGNED_INT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCREEN_RES_W, SCREEN_RES_H,0, GL_RGBA, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	//attach selection texture as color attachment 1
@@ -270,7 +273,8 @@ int main(void)
 		// try rendering to custom framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 		// Specify the color of the background
-		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+		//glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+		glClearColor(0.0, 0.0, 0.0, 1.0);
 		// Clean the back buffer and assign the new color to it
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		glViewport(0, 0, SCREEN_RES_W, SCREEN_RES_H);
@@ -429,11 +433,50 @@ int main(void)
 
 	if (ImGui::Begin("ViewPortTest",&bf , ImGuiWindowFlags_NoScrollbar))
 	{
-		ImVec2 size = ImGui::GetWindowSize();
+		ImVec2 workSize = { ImGui::GetWindowWidth(), ImGui::GetWindowHeight() };
+		ImVec2 workPos = ImGui::GetWindowPos();
+		ImVec2 mousePos = ImGui::GetMousePos();
+
+		//std::cout << workPos.x << " " << workPos.y << std::endl;
+		//std::cout << "OG" << mousePos.x << " " << mousePos.y << std::endl;
+		mousePos.x -= workPos.x;
+		mousePos.y -= workPos.y;
+
+		//std::cout << workSize.x << " " << workSize.y << std::endl;
+
+		if ( mousePos.x <= workSize.x && mousePos.y <= workSize.y)
+		{
+
+			float scaleX = 2560.0 / workSize.x;
+			float scaleY = 1440.0 / workSize.y;
+			//std::cout << "-Window" << mousePos.x << " " << mousePos.y << std::endl;
+			mousePos.x *= scaleX;
+			mousePos.y *= scaleY;
+			//std::cout << "Scaled" << mousePos.x << " " << mousePos.y << std::endl;
+
+			// Handle the picking
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+			glReadBuffer(GL_COLOR_ATTACHMENT1);
+			glm::vec3 pColor(0.0f);
+			//std::cout << mousePos.x << " " << mousePos.y << std::endl;
+			glReadPixels(mousePos.x, mousePos.y, 1, 1, GL_RGB, GL_FLOAT, &pColor[0]);
+
+			float selColor = pColor[0];
+			selColor *= 100.f;
+			selColor = trunc(selColor);
+			int selID = (int)selColor;
+			std::cout << selID << std::endl;
+			//ResourceManager::SelectObject(selID);
+
+			glReadBuffer(GL_NONE);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+		}
+
 		if(colorRender == 0)
-		ImGui::Image((ImTextureID)textureColorBuffer,size,ImVec2(0,1),ImVec2(1,0));
+		ImGui::Image((ImTextureID)textureColorBuffer,workSize,ImVec2(0,1),ImVec2(1,0));
 		else
-			ImGui::Image((ImTextureID)selectionColorBuffer, size, ImVec2(0, 1), ImVec2(1, 0));
+			ImGui::Image((ImTextureID)selectionColorBuffer, workSize, ImVec2(0, 1), ImVec2(1, 0));
+
 		ImGui::End();
 	}
 
@@ -509,6 +552,14 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			colorRender = 1;
 		else
 			colorRender = 0;
+	}
+
+	if (!bViewPortActive)
+	{
+		if (glfwGetKey(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
+			bLeftMouseButton = true;
+		if (glfwGetKey(window, GLFW_MOUSE_BUTTON_1) == GLFW_RELEASE)
+			bLeftMouseButton = false;
 	}
 }
 void processInput(GLFWwindow* window)
@@ -586,6 +637,8 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 		xoffset *= 0.1f;
 		location[0] += xoffset;
 	}
+
+	//std::cout << xpos << " " << ypos << std::endl;
 }
 
 void renderPlane()

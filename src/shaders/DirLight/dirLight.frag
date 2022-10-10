@@ -30,7 +30,7 @@ void main()
 	float clrID = resourceID;
 
 	if(clrID != 0)
-	clrID /= 1000.0;
+	clrID /= 100.0;
 
 	FragColor = vec4(ambient+diffuse, 1.0);
 	selectionID = vec4(vec3(clrID),1.0);
