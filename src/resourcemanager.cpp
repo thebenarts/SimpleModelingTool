@@ -15,8 +15,8 @@ std::map<std::string, Texture2D> ResourceManager::texture2DMap;
 std::map<std::string, Shader*> ResourceManager::shadersMap;
 std::map<unsigned int, Object*> ResourceManager::objectMap;
 
-unsigned int ResourceManager::resourceID = 0;
-unsigned int ResourceManager::selectedID = 0;
+unsigned int ResourceManager::resourceID = 1;
+unsigned int ResourceManager::selectedID = 1;
 
 Shader* ResourceManager::GetShader(std::string name)
 {
@@ -189,4 +189,21 @@ unsigned int ResourceManager::SelectNextObject()
 		ResourceManager::objectMap[ResourceManager::GetSelectedID()]->bSelected = true;
 
 	return ResourceManager::selectedID;
+}
+
+unsigned int ResourceManager::SelectObject(unsigned int objectID)
+{
+	if (ResourceManager::objectMap.find(objectID) == ResourceManager::objectMap.end())
+	{
+		std::cout << "ERROR::COULD NOT FIND SELECTED OBJECT";
+		return -1;
+	}
+
+	if (ResourceManager::objectMap.find(ResourceManager::selectedID) != ResourceManager::objectMap.end())
+		objectMap[selectedID]->bSelected = false;
+
+	ResourceManager::objectMap[objectID]->bSelected = true;
+	ResourceManager::selectedID = objectID;
+
+	return objectID;
 }

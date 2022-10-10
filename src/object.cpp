@@ -7,6 +7,7 @@ bVisibility(true)
 {
 	location = glm::vec3(0.0f);
 	rotation = glm::vec3(0.0f);
+	objectName = "Object" + std::to_string(objectID);
 }
 
 void Object::Draw(Shader* shader) {}

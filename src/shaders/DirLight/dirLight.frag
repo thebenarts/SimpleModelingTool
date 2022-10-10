@@ -1,5 +1,6 @@
 #version 330 core
-out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 selectionID;
 
 struct DirLight{
 	vec3 direction;
@@ -14,6 +15,8 @@ in vec2 TexCoords;
 uniform vec3 viewPos;
 uniform DirLight light;
 
+uniform unsigned int resourceID;
+
 void main()
 {
 	vec3 ambient = light.ambient * vec3(0.5,0.5,0.5);
@@ -24,5 +27,11 @@ void main()
 	float diff = max(dot(norm, lightDir), 0.0);
 	vec3 diffuse = light.diffuse * diff * vec3(0.5,0.5,0.5);
 
+	float clrID = resourceID;
+
+	if(clrID != 0)
+	clrID /= 1000.0;
+
 	FragColor = vec4(ambient+diffuse, 1.0);
+	selectionID = vec4(vec3(clrID),1.0);
 }

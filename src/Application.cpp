@@ -54,6 +54,8 @@ glm::vec3 location = glm::vec3(0.0f);
 glm::vec3 rotation = glm::vec3(0.0f);
 glm::vec3 scale = glm::vec3(1.0f);
 
+unsigned int colorRender = 0;
+
 enum userState
 {
 	Normal,
@@ -196,6 +198,22 @@ int main(void)
 	// attach texture to fbo
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorBuffer, 0);
 
+	unsigned int selectionColorBuffer;
+	glGenTextures(1, &selectionColorBuffer);
+	glBindTexture(GL_TEXTURE_2D, selectionColorBuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCREEN_RES_W, SCREEN_RES_H,0, GL_RGBA, GL_UNSIGNED_INT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	//attach selection texture as color attachment 1
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, selectionColorBuffer, 0);
+
+	unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+
+	glDrawBuffers(2, attachments);
+
+	// Renderbuffer for depth and stencil
 	unsigned int rbo;
 	glGenRenderbuffers(1, &rbo);
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
@@ -203,6 +221,7 @@ int main(void)
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 	{
@@ -255,6 +274,10 @@ int main(void)
 		// Clean the back buffer and assign the new color to it
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		glViewport(0, 0, SCREEN_RES_W, SCREEN_RES_H);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, textureColorBuffer);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, selectionColorBuffer);
 
 		//--------------------------------------------------------------------------------------------------------------------------------
 		Object* currentObject = ResourceManager::GetSelectedObject();
@@ -380,11 +403,37 @@ int main(void)
 			}
 			ImGui::End();
 		}
+
+		{
+			ImGui::Begin("SelectObject");
+			if (ImGui::TreeNode("Objects"))
+			{
+				for (std::pair<const unsigned int , Object*>& current : ResourceManager::objectMap)
+				{
+					ImGui::PushID(current.first);
+					const char* selID = current.second->objectName.c_str();
+					if (ImGui::Selectable(selID))
+					{
+						ResourceManager::SelectObject(current.first);
+					}
+
+					ImGui::PopID();
+				}
+				ImGui::TreePop();
+			}
+			ImGui::End();
+		}
+
 		bool bf = true;
+
+
 	if (ImGui::Begin("ViewPortTest",&bf , ImGuiWindowFlags_NoScrollbar))
 	{
 		ImVec2 size = ImGui::GetWindowSize();
+		if(colorRender == 0)
 		ImGui::Image((ImTextureID)textureColorBuffer,size,ImVec2(0,1),ImVec2(1,0));
+		else
+			ImGui::Image((ImTextureID)selectionColorBuffer, size, ImVec2(0, 1), ImVec2(1, 0));
 		ImGui::End();
 	}
 
@@ -453,6 +502,14 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS)
 		ResourceManager::SelectNextObject();
+
+	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+	{
+		if (colorRender == 0)
+			colorRender = 1;
+		else
+			colorRender = 0;
+	}
 }
 void processInput(GLFWwindow* window)
 {

@@ -23,6 +23,7 @@ public:
 
 	void setBool(const std::string& name, bool value, bool useShader = false);
 	void setInt(const std::string& name, int value, bool useShader = false);
+	void setUInt(const std::string& name, unsigned int value, bool useShader = false);
 	void setFloat(const std::string& name, float value, bool useShader = false);
 	void setVec2(const std::string& name, const glm::vec2& value, bool useShader = false);
 	void setVec2(const std::string& name, float x, float y, bool useShader = false);

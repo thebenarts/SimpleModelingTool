@@ -49,6 +49,8 @@ public:
 
 	static unsigned int SelectNextObject();
 
+	static unsigned int SelectObject(unsigned int objectID);
+
 	static void CreateCube();
 
 private:

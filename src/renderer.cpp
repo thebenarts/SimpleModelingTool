@@ -38,7 +38,6 @@ void Renderer::RenderScene()
 	dirLight->setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
 	dirLight->setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
 
-
 	Shader* outline = ResourceManager::GetShader("outline");
 	if (!outline)
 	{

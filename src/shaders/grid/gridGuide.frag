@@ -1,5 +1,7 @@
 #version 330 core
-out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 selectionID;
+//out vec4 FragColor;
 
 in VS_OUT{
 	mat4 projection;
@@ -69,4 +71,5 @@ void main()
 	//FragColor = vec4(vec3(fading),1.0);
 	FragColor =(grid(fragPos3D, 1) + grid(fragPos3D, 0.2))* float(t > 0);
 	FragColor.a *= fading;
+	selectionID = vec4(0.0);
 }

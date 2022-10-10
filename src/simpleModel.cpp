@@ -34,6 +34,7 @@ void Cube::Draw(Shader* shader) {
 	model = glm::rotate(model, glm::radians(rotation[2]), glm::vec3(0, 0, 1));
 	shader->Use();
 	shader->setMat4("model", model);
+	shader->setUInt("resourceID", objectID);
 
 	glBindVertexArray(VAO);
 

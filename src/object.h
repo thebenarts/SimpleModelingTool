@@ -12,6 +12,7 @@ class Object
 		virtual void Draw(Shader* shader);
 
 		unsigned int objectID;
+		std::string objectName;
 		bool bVisibility;
 		bool bSelected;
 
