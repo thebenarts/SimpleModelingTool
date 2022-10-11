@@ -17,7 +17,7 @@ void Renderer::RenderScene()
 		return;
 	}
 
-	Shader* dirLight = ResourceManager::GetShader("dirLight");
+	Shader* dirLight = ResourceManager::GetShader("albedo");
 	if (!dirLight)
 	{
 		std::cout << "SHADER::ERROR:: MISSING SHADER: IN RENDERER" << std::endl;
@@ -56,7 +56,7 @@ void Renderer::RenderScene()
 		if (currentObject->bVisibility){
 			currentObject->Draw(dirLight);
 			if (currentObject->bSelected) {
-				Cube* selected = static_cast<Cube*>(currentObject);
+				Cube* selected = dynamic_cast<Cube*>(currentObject);
 				if (selected) {
 					// save data
 					glm::vec3 pLocation = selected->GetObjectLocation();

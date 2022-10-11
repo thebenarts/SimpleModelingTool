@@ -1,5 +1,6 @@
 #version 330 core
-out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out int selectionID;
 
 struct DirLight{
 	vec3 direction;
@@ -16,6 +17,8 @@ uniform DirLight light;
 
 uniform sampler2D albedo;
 
+uniform unsigned int resourceID;
+
 void main()
 {
 	vec3 color = texture(albedo, TexCoords).rgb;
@@ -27,4 +30,5 @@ void main()
 	float diff = max(dot(norm, lightDir), 0.0);
 	vec3 diffuse = light.diffuse * diff * color;
 	FragColor = vec4(ambient + diffuse, 1.0);
+	selectionID = int(resourceID);
 }
