@@ -29,9 +29,8 @@ public:
 	// resource storage
 	static std::map<std::string, Shader*> shadersMap;
 	static std::map<std::string, Texture2D> texture2DMap;
-	static std::map<unsigned int, Object*> objectMap;
 	static std::vector<Object*>objects;
-	static std::priority_queue<int, std::deque<int>, std::greater<int>> freeID;
+	static std::priority_queue<unsigned int, std::deque<unsigned int>, std::greater<unsigned int>> freeID;
 	// loads (and generates) a shader program from file loading vertex, fragment (and geometry) shadrer's source code.
 	static Shader* LoadShader(std::string name, const char* vShaderfile, const char* fShaderFile, const char* gShaderFile);
 	// retrieves stored shader
@@ -44,7 +43,9 @@ public:
 	// properly de-allocates all loaded resources
 	static void Clear();
 	
-	static unsigned int GetResourceID() { return resourceID++; }
+	static unsigned int GetResourceID();
+
+	static unsigned int GetandAddResourceID(Object* inObject);
 
 	static unsigned int GetSelectedID() { return selectedID; }
 
@@ -53,6 +54,8 @@ public:
 	static unsigned int SelectNextObject();
 
 	static unsigned int SelectObject(unsigned int objectID);
+
+	static void RemoveObject();
 
 	static void CreateCube();
 
