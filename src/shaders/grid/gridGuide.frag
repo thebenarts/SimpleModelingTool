@@ -71,5 +71,5 @@ void main()
 	//FragColor = vec4(vec3(fading),1.0);
 	FragColor =(grid(fragPos3D, 1) + grid(fragPos3D, 0.2))* float(t > 0);
 	FragColor.a *= fading;
-	selectionID = 0;
+	selectionID = -1;
 }

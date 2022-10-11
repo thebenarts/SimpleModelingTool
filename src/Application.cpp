@@ -284,6 +284,9 @@ int main(void)
 		//glClearColor(0.0, 0.0, 0.0, 1.0);
 		// Clean the back buffer and assign the new color to it
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+		int clearVal = -1;
+		glClearBufferiv(GL_COLOR, 1, &clearVal);
 		glViewport(0, 0, SCREEN_RES_W, SCREEN_RES_H);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textureColorBuffer);
@@ -305,16 +308,16 @@ int main(void)
 		////DIRLIGHT
 		//if (bDirLightToggle) {
 			//lightshade
-			albedo->Use();
-			albedo->setVec3("light.direction", glm::vec3(camera->Front));
-			albedo->setVec3("viewPos", camera->Position);
-			//light properties
-			albedo->setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
-			albedo->setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
-					
+		albedo->Use();
+		albedo->setVec3("light.direction", glm::vec3(camera->Front));
+		albedo->setVec3("viewPos", camera->Position);
+		//light properties
+		albedo->setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+		albedo->setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+
 		////bpModel.Draw(unlit);
 		Renderer::RenderScene();
-		
+
 
 
 		// bind Texture
@@ -333,7 +336,7 @@ int main(void)
 		// Specify the color of the background
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		// Clean the back buffer and assign the new color to it
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glViewport(0, 0, SRC_WIDTH, SRC_HEIGHT);
 
 
