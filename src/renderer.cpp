@@ -48,15 +48,15 @@ void Renderer::RenderScene()
 
 	glStencilFunc(GL_ALWAYS, 1, 0xFF);
 	glStencilMask(0xFF);
-	for (std::pair<const unsigned int, Object*>& currentObject : ResourceManager::objectMap)
+	for (Object* currentObject : ResourceManager::objects)
 	{
-		//if (!currentObject.second)
-			//continue;
+		if (!currentObject)
+			continue;
 
-		if (currentObject.second->bVisibility){
-			currentObject.second->Draw(dirLight);
-			if (currentObject.second->bSelected) {
-				Cube* selected = static_cast<Cube*>(currentObject.second);
+		if (currentObject->bVisibility){
+			currentObject->Draw(dirLight);
+			if (currentObject->bSelected) {
+				Cube* selected = static_cast<Cube*>(currentObject);
 				if (selected) {
 					// save data
 					glm::vec3 pLocation = selected->GetObjectLocation();
