@@ -31,6 +31,7 @@ void renderCube();	unsigned int cubeVAO = 0, cubeVBO = 0;
 void renderSphere();
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 
 int SRC_WIDTH = 1600;
 int SRC_HEIGHT = 900;
@@ -115,6 +116,7 @@ int main(void)
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
 	glfwSetKeyCallback(window, key_callback);
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
 
 	// Initialize ImGUI
 	IMGUI_CHECKVERSION();
@@ -460,11 +462,13 @@ int main(void)
 
 		ImVec2 mp = ImGui::GetMousePos();		// absolute mouse pos
 		glm::vec2 mousePos{ mp.x,mp.y };
-		mousePos.x -= viewportBounds[0].x;		// 0 out our mouse pos so , it starts from top left  of the viewport window at 0,0
-		mousePos.y -= viewportBounds[0].y;
+
 		//check if the mouse is over the screen area of the viewport
 		if (mousePos.x >= viewportBounds[0].x && mousePos.x <= viewportBounds[1].x && mousePos.y >= viewportBounds[0].y && mousePos.y <= viewportBounds[1].y)
 		{
+			mousePos.x -= viewportBounds[0].x;		// top left of the viewport window becomes 0,0
+			mousePos.y -= viewportBounds[0].y;
+
 			mousePos.y = viewportSize.y - mousePos.y;		// flip y since openGL starts from bottom left instead of top left
 
 			float scaleX = 2560.0 / viewportSize.x;
@@ -483,15 +487,15 @@ int main(void)
 			//std::cout << mousePos.x << " " << mousePos.y << std::endl;
 			glReadPixels(mousePos.x, mousePos.y, 1, 1, GL_RED_INTEGER, GL_INT, &pColor);
 
-
+			selectedID = pColor;
 			std::cout << pColor << std::endl;
 			//ResourceManager::SelectObject(selID);
 
 			glReadBuffer(GL_NONE);
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 
-
-			ResourceManager::SelectObject(pColor);
+			
+			//ResourceManager::SelectObject(pColor);
 		}
 		ImGui::End();
 	}
@@ -533,6 +537,15 @@ int main(void)
 // _________________________________________________________________________________
 // ------------------------------------- END ---------------------------------------
 // _________________________________________________________________________________
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+	if (!bViewPortActive)
+	{
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+			std::cout << "nice click" << std::endl;
+			ResourceManager::SelectObject(selectedID);
+	}
+}
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -568,14 +581,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			colorRender = 1;
 		else
 			colorRender = 0;
-	}
-
-	if (!bViewPortActive)
-	{
-		if (glfwGetKey(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS && selectedID != 0)
-			ResourceManager::SelectObject(selectedID);
-		if (glfwGetKey(window, GLFW_MOUSE_BUTTON_1) == GLFW_RELEASE)
-			bLeftMouseButton = false;
 	}
 }
 void processInput(GLFWwindow* window)
