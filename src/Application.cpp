@@ -324,7 +324,7 @@ int main(void)
 		glActiveTexture(GL_TEXTURE0);
 		albedoTexture.Bind();
 
-		Renderer::RenderScene();
+		//Renderer::RenderScene();
 
 		//---------------------------------------------------------------------------------------------------------------------------------
 
@@ -498,8 +498,6 @@ int main(void)
 
 			glReadBuffer(GL_NONE);
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-
-			ResourceManager::SelectObject(pColor);
 		}
 		ImGui::End();
 	}
@@ -586,6 +584,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		else
 			colorRender = 0;
 	}
+
+	if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
+		ResourceManager::RemoveObject();
+
 }
 void processInput(GLFWwindow* window)
 {

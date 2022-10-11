@@ -2,11 +2,12 @@
 #include "resourcemanager.h"
 
 Object::Object() :
-objectID(ResourceManager::GetResourceID()),
+objectID (ResourceManager::GetandAddResourceID(this)),
 bVisibility(true) 
 {
 	location = glm::vec3(0.0f);
 	rotation = glm::vec3(0.0f);
+	//objectID = ResourceManager::GetandAddResourceID(this);
 	objectName = "Object" + std::to_string(objectID);
 }
 

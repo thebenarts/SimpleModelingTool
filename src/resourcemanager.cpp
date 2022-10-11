@@ -13,9 +13,8 @@
 
 std::map<std::string, Texture2D> ResourceManager::texture2DMap;
 std::map<std::string, Shader*> ResourceManager::shadersMap;
-std::map<unsigned int, Object*> ResourceManager::objectMap;
 std::vector<Object*>ResourceManager::objects;
-std::priority_queue<int, std::deque<int>, std::greater<int>>ResourceManager::freeID;
+std::priority_queue<unsigned int, std::deque<unsigned int>, std::greater<unsigned int>>ResourceManager::freeID;
 
 unsigned int ResourceManager::resourceID = 0;
 unsigned int ResourceManager::selectedID = 0;
@@ -124,8 +123,7 @@ void ResourceManager::Clear()
 void ResourceManager::CreateCube()
 {
 	Cube* cObject = new Cube();
-	objects.push_back(static_cast<Object*>(cObject));
-	SelectNextObject();
+	SelectObject(cObject->objectID);
 }
 
 Object* ResourceManager::GetSelectedObject()
@@ -216,4 +214,42 @@ unsigned int ResourceManager::SelectObject(unsigned int objectID)
 	ResourceManager::selectedID = objectID;
 
 	return objectID;
+}
+
+void ResourceManager::RemoveObject()
+{
+	Object* objectToRemove = GetSelectedObject();
+	if (objectToRemove)
+	{
+		int dID = objectToRemove->objectID;
+		freeID.push(dID);
+		delete objectToRemove;
+		objects[dID] = nullptr;
+	}
+}
+
+unsigned int ResourceManager::GetResourceID()
+{
+	if (ResourceManager::freeID.empty())
+		return resourceID++;
+
+	unsigned int rID = ResourceManager::freeID.top();
+	freeID.pop();
+
+	return rID;
+}
+
+unsigned int ResourceManager::GetandAddResourceID(Object* inObject)
+{
+	if (ResourceManager::freeID.empty())
+	{
+		ResourceManager::objects.push_back(inObject);
+		return resourceID++;
+	}
+
+	unsigned int rID = ResourceManager::freeID.top();
+	freeID.pop();
+
+	ResourceManager::objects[rID] = inObject;
+	return rID;
 }
