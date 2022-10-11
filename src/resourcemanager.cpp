@@ -14,9 +14,11 @@
 std::map<std::string, Texture2D> ResourceManager::texture2DMap;
 std::map<std::string, Shader*> ResourceManager::shadersMap;
 std::map<unsigned int, Object*> ResourceManager::objectMap;
+std::vector<Object*>ResourceManager::objects;
+std::priority_queue<int, std::deque<int>, std::greater<int>>ResourceManager::freeID;
 
-unsigned int ResourceManager::resourceID = 1;
-unsigned int ResourceManager::selectedID = 1;
+unsigned int ResourceManager::resourceID = 0;
+unsigned int ResourceManager::selectedID = 0;
 
 Shader* ResourceManager::GetShader(std::string name)
 {
@@ -122,49 +124,49 @@ void ResourceManager::Clear()
 void ResourceManager::CreateCube()
 {
 	Cube* cObject = new Cube();
-	objectMap[ResourceManager::GetResourceID()] = static_cast<Object*>(cObject);
+	objects.push_back(static_cast<Object*>(cObject));
 	SelectNextObject();
 }
 
 Object* ResourceManager::GetSelectedObject()
 {
-	if (ResourceManager::objectMap.empty())
+	if (ResourceManager::objects.empty())
 	{
 		std::cout << "OBJECT MAP IS EMPTY:: NOTHING TO RETURN" << std::endl;
 		return nullptr;
 	}
-
-	if (ResourceManager::objectMap.find(ResourceManager::selectedID) == ResourceManager::objectMap.end())
+	
+	if (!ResourceManager::objects[ResourceManager::selectedID])
 	{
 		std::cout << "SELECTED ID : COULD NOT BE FOUND " << std::endl;
 		if(UINT_MAX == SelectNextObject());
 		return nullptr;
 	}
 
-	return ResourceManager::objectMap[ResourceManager::selectedID];
+	return ResourceManager::objects[ResourceManager::selectedID];
 }
 
 unsigned int ResourceManager::FindNextObjectID()
 {
-	if (objectMap.empty())
+	if (objects.empty())
 	{
 		std::cout << "there is no item to select" << std::endl;
 		return UINT_MAX;
 	}
 
-	if (ResourceManager::selectedID > ResourceManager::resourceID || ResourceManager::selectedID + 1 > ResourceManager::resourceID)
-		return ResourceManager::selectedID = objectMap.begin()->first;
+	if (ResourceManager::selectedID >= ResourceManager::objects.size() || ResourceManager::selectedID + 1 >= ResourceManager::objects.size())
+		return ResourceManager::selectedID = 0;
 	else
 		++ResourceManager::selectedID;
 
-	if (ResourceManager::objectMap.find(ResourceManager::selectedID) == ResourceManager::objectMap.end())
+	if (!ResourceManager::objects[selectedID])
 	{
 		++ResourceManager::selectedID;
 		if (ResourceManager::selectedID > ResourceManager::resourceID)
-			return ResourceManager::selectedID = objectMap.begin()->first;
+			return ResourceManager::selectedID = 0;
 		while (ResourceManager::selectedID < ResourceManager::resourceID)
 		{
-			if (ResourceManager::objectMap.find(ResourceManager::selectedID) != ResourceManager::objectMap.end())
+			if (ResourceManager::objects[ResourceManager::selectedID])
 				return ResourceManager::selectedID;
 
 			selectedID++;
@@ -175,8 +177,8 @@ unsigned int ResourceManager::FindNextObjectID()
 
 unsigned int ResourceManager::SelectNextObject()
 {
-	if (ResourceManager::objectMap[ResourceManager::GetSelectedID()])
-		ResourceManager::objectMap[ResourceManager::GetSelectedID()]->bSelected = false;
+	if (ResourceManager::selectedID <= ResourceManager::resourceID && ResourceManager::objects[ResourceManager::GetSelectedID()])
+		ResourceManager::objects[ResourceManager::GetSelectedID()]->bSelected = false;
 
 	if (UINT_MAX == ResourceManager::FindNextObjectID())
 	{
@@ -185,24 +187,32 @@ unsigned int ResourceManager::SelectNextObject()
 	}
 
 	// let the object know it's selected
-	if (ResourceManager::objectMap[ResourceManager::GetSelectedID()])
-		ResourceManager::objectMap[ResourceManager::GetSelectedID()]->bSelected = true;
+	if (ResourceManager::selectedID < ResourceManager::objects.size() && ResourceManager::objects[ResourceManager::selectedID])
+		ResourceManager::objects[ResourceManager::selectedID]->bSelected = true;
 
 	return ResourceManager::selectedID;
 }
 
 unsigned int ResourceManager::SelectObject(unsigned int objectID)
 {
-	if (ResourceManager::objectMap.find(objectID) == ResourceManager::objectMap.end())
+	if (ResourceManager::objects.empty())
 	{
 		std::cout << "ERROR::COULD NOT FIND SELECTED OBJECT";
-		return -1;
+		return 0;
 	}
 
-	if (ResourceManager::objectMap.find(ResourceManager::selectedID) != ResourceManager::objectMap.end())
-		objectMap[selectedID]->bSelected = false;
+	if (objectID > ResourceManager::resourceID)
+	{
+		std::cout << "ERROR::COULD NOT FIND SELECTED OBJECT";
+		return 0;
+	}
 
-	ResourceManager::objectMap[objectID]->bSelected = true;
+	if (ResourceManager::selectedID < ResourceManager::objects.size() && ResourceManager::objects[ResourceManager::selectedID])
+		ResourceManager::objects[ResourceManager::selectedID]->bSelected = false;
+
+	// should probably check in freeID as well but for now it should be alright 
+	if(ResourceManager::objects[objectID])
+	ResourceManager::objects[objectID]->bSelected = true;
 	ResourceManager::selectedID = objectID;
 
 	return objectID;

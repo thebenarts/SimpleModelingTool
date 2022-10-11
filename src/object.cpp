@@ -2,7 +2,7 @@
 #include "resourcemanager.h"
 
 Object::Object() :
-objectID(ResourceManager::resourceID),
+objectID(ResourceManager::GetResourceID()),
 bVisibility(true) 
 {
 	location = glm::vec3(0.0f);
