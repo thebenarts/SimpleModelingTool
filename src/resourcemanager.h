@@ -9,6 +9,7 @@
 #include <sstream>
 #include <fstream>
 
+#include <queue>
 #include "texture.h"
 #include "shader_m.h"
 #include "object.h"
@@ -29,6 +30,8 @@ public:
 	static std::map<std::string, Shader*> shadersMap;
 	static std::map<std::string, Texture2D> texture2DMap;
 	static std::map<unsigned int, Object*> objectMap;
+	static std::vector<Object*>objects;
+	static std::priority_queue<int, std::deque<int>, std::greater<int>> freeID;
 	// loads (and generates) a shader program from file loading vertex, fragment (and geometry) shadrer's source code.
 	static Shader* LoadShader(std::string name, const char* vShaderfile, const char* fShaderFile, const char* gShaderFile);
 	// retrieves stored shader

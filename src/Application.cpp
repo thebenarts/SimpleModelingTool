@@ -417,13 +417,16 @@ int main(void)
 			ImGui::Begin("SelectObject");
 			if (ImGui::TreeNode("Objects"))
 			{
-				for (std::pair<const unsigned int , Object*>& current : ResourceManager::objectMap)
+				for (Object* current : ResourceManager::objects)
 				{
-					ImGui::PushID(current.first);
-					const char* selID = current.second->objectName.c_str();
+					if (!current)
+						continue;
+
+					ImGui::PushID(current->objectID);
+					const char* selID = current->objectName.c_str();
 					if (ImGui::Selectable(selID))
 					{
-						ResourceManager::SelectObject(current.first);
+						ResourceManager::SelectObject(current->objectID);
 					}
 
 					ImGui::PopID();
@@ -460,11 +463,12 @@ int main(void)
 
 		ImVec2 mp = ImGui::GetMousePos();		// absolute mouse pos
 		glm::vec2 mousePos{ mp.x,mp.y };
-		mousePos.x -= viewportBounds[0].x;		// 0 out our mouse pos so , it starts from top left  of the viewport window at 0,0
-		mousePos.y -= viewportBounds[0].y;
 		//check if the mouse is over the screen area of the viewport
 		if (mousePos.x >= viewportBounds[0].x && mousePos.x <= viewportBounds[1].x && mousePos.y >= viewportBounds[0].y && mousePos.y <= viewportBounds[1].y)
 		{
+			mousePos.x -= viewportBounds[0].x;		// 0 out our mouse pos so , it starts from top left  of the viewport window at 0,0
+			mousePos.y -= viewportBounds[0].y;
+
 			mousePos.y = viewportSize.y - mousePos.y;		// flip y since openGL starts from bottom left instead of top left
 
 			float scaleX = 2560.0 / viewportSize.x;
@@ -489,7 +493,6 @@ int main(void)
 
 			glReadBuffer(GL_NONE);
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-
 
 			ResourceManager::SelectObject(pColor);
 		}
