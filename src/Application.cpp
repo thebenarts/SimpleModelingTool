@@ -316,7 +316,7 @@ int main(void)
 		albedo->setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
 
 		////bpModel.Draw(unlit);
-		Renderer::RenderScene();
+		//Renderer::RenderScene();
 
 
 
@@ -352,8 +352,10 @@ int main(void)
 		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoScrollbar;
 
 		ImGui::Begin("SimpleModelingTool");
-		ImGui::End();
 		ImGui::PopStyleVar(2);
+		ImGui::DockSpace(ImGui::GetID("DockSpace"));
+		ImGui::End();
+		
 		// --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 		// ImGUI window creation
@@ -499,7 +501,7 @@ int main(void)
 			glReadBuffer(GL_NONE);
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 
-			ResourceManager::SelectObject(pColor);
+			//ResourceManager::SelectObject(pColor);
 		}
 		ImGui::End();
 	}
