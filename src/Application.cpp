@@ -439,82 +439,44 @@ int main(void)
 	if (ImGui::Begin("ViewPortTest",&bf , ImGuiWindowFlags_NoScrollbar))
 	{
 
-		ImVec2 viewportOffset = ImGui::GetCursorPos();
+		ImVec2 viewportOffset = ImGui::GetCursorPos();		// account for offset of taskbars etc.
 
-		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
+		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();		// get viewport size
 		viewportSize = { viewportPanelSize.x, viewportPanelSize.y };
 
-		//ImVec2 workSize = { ImGui::GetWindowWidth(), ImGui::GetWindowHeight() };
-		//ImVec2 workPos = ImGui::GetWindowPos();
-		//ImVec2 mousePos = ImGui::GetMousePos();
-
-		////std::cout << workPos.x << " " << workPos.y << std::endl;
-		////std::cout << "OG" << mousePos.x << " " << mousePos.y << std::endl;
-		//mousePos.x -= workPos.x;
-		//mousePos.y -= workPos.y;
-
-		////std::cout << workSize.x << " " << workSize.y << std::endl;
-
-		//if ( mousePos.x <= workSize.x && mousePos.y <= workSize.y)
-		//{
-
-		//	float scaleX = 2560.0 / workSize.x;
-		//	float scaleY = 1440.0 / workSize.y;
-		//	//std::cout << "-Window" << mousePos.x << " " << mousePos.y << std::endl;
-		//	mousePos.x *= scaleX;
-		//	mousePos.y *= scaleY;
-		//	//std::cout << "Scaled" << mousePos.x << " " << mousePos.y << std::endl;
-
-		//	// Handle the picking
-		//	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
-		//	glReadBuffer(GL_COLOR_ATTACHMENT1);
-		//	glm::vec3 pColor(0.0f);
-		//	//std::cout << mousePos.x << " " << mousePos.y << std::endl;
-		//	glReadPixels(mousePos.x, mousePos.y, 1, 1, GL_RGB, GL_FLOAT, &pColor[0]);
-
-		//	float selColor = pColor[0];
-		//	selColor *= 100.f;
-		//	selColor = trunc(selColor);
-		//	int selID = (int)selColor;
-		//	std::cout << selID << std::endl;
-		//	//ResourceManager::SelectObject(selID);
-
-		//	glReadBuffer(GL_NONE);
-		//	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-		//}
-
+		// render to the screen
 		if(colorRender == 0)
 			ImGui::Image((ImTextureID)textureColorBuffer,ImVec2(viewportSize.x, viewportSize.y),ImVec2(0,1),ImVec2(1,0));
-		else
-			ImGui::Image((ImTextureID)selectionColorBuffer, ImVec2(viewportSize.x, viewportSize.y), ImVec2(0, 1), ImVec2(1, 0));
 
 		ImVec2 windowSize = ImGui::GetWindowSize();
-		ImVec2 minBound = ImGui::GetWindowPos();
+		ImVec2 minBound = ImGui::GetWindowPos();	// top left of pos of viewport
 
-		minBound.x += viewportOffset.x;
+		minBound.x += viewportOffset.x;		// update offset depending on the window taskbar etc.
 		minBound.y += viewportOffset.y;
 
-		ImVec2 maxBound = { minBound.x + windowSize.x, minBound.y + windowSize.y };
+		ImVec2 maxBound = { minBound.x + windowSize.x, minBound.y + windowSize.y };	// bottom right corner of the window
 		viewportBounds[0] = { minBound.x, minBound.y };
 		viewportBounds[1] = { maxBound.x, maxBound.y };
 
-		ImVec2 mp = ImGui::GetMousePos();
+		ImVec2 mp = ImGui::GetMousePos();		// absolute mouse pos
 		glm::vec2 mousePos{ mp.x,mp.y };
-		mousePos.x -= viewportBounds[0].x;
+		mousePos.x -= viewportBounds[0].x;		// 0 out our mouse pos so , it starts from top left  of the viewport window at 0,0
 		mousePos.y -= viewportBounds[0].y;
-		glm::vec2 viewportSize = viewportBounds[1] - viewportBounds[0];
-		mousePos.y = viewportSize.y - mousePos.y;		// flip y since openGL starts from bottom left instead of top left
+		//check if the mouse is over the screen area of the viewport
+		if (mousePos.x >= viewportBounds[0].x && mousePos.x <= viewportBounds[1].x && mousePos.y >= viewportBounds[0].y && mousePos.y <= viewportBounds[1].y)
+		{
+			mousePos.y = viewportSize.y - mousePos.y;		// flip y since openGL starts from bottom left instead of top left
 
-		float scaleX = 2560.0 / viewportSize.x;
-		float scaleY = 1440.0 / viewportSize.y;
-		mousePos.x *= scaleX;
-		mousePos.y *= scaleY;
-		
-		//std::cout << mousePos.x << " " << mousePos.y << std::endl;
-		//std::cout << "min" << viewportBounds[0].x << " " << viewportBounds[0].y << std::endl;
-		//std::cout << "max" << viewportBounds[1].x << " " << viewportBounds[1].y << std::endl;
+			float scaleX = 2560.0 / viewportSize.x;
+			float scaleY = 1440.0 / viewportSize.y;
+			mousePos.x *= scaleX;
+			mousePos.y *= scaleY;
 
-			// Handle the picking
+			//std::cout << mousePos.x << " " << mousePos.y << std::endl;
+			//std::cout << "min" << viewportBounds[0].x << " " << viewportBounds[0].y << std::endl;
+			//std::cout << "max" << viewportBounds[1].x << " " << viewportBounds[1].y << std::endl;
+
+				// Handle the picking
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
 			glReadBuffer(GL_COLOR_ATTACHMENT1);
 			int pColor;
@@ -528,9 +490,9 @@ int main(void)
 			glReadBuffer(GL_NONE);
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 
-			
-			ResourceManager::SelectObject(pColor);
 
+			ResourceManager::SelectObject(pColor);
+		}
 		ImGui::End();
 	}
 
