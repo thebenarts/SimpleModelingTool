@@ -1,6 +1,6 @@
 #pragma once
 #include "object.h"
-
+#include "resourcemanager.h"
 #include <vector>
 
 class Cube : public Object {
@@ -9,6 +9,8 @@ public:
 	Cube();
 
 	glm::vec3 scale;
+
+	Texture2D* texture;
 
 	unsigned int VAO;
 	unsigned int VBO;

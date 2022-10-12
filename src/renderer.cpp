@@ -56,7 +56,7 @@ void Renderer::RenderScene()
 		if (currentObject->bVisibility){
 			currentObject->Draw(dirLight);
 			if (currentObject->bSelected) {
-				Cube* selected = static_cast<Cube*>(currentObject);
+				Cube* selected = dynamic_cast<Cube*>(currentObject);
 				if (selected) {
 					// save data
 					glm::vec3 pLocation = selected->GetObjectLocation();

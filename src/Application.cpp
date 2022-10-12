@@ -60,6 +60,7 @@ glm::vec3 scale = glm::vec3(1.0f);
 
 glm::vec2 viewportSize;
 glm::vec2 viewportBounds[2];
+Texture2D* cTexture;
 
 unsigned int colorRender = 0;
 
@@ -256,7 +257,7 @@ int main(void)
 
 	// --------------------------------- LOAD TEXTURE ----------------------------------------------
 	ResourceManager::LoadTexture2D("src/assets/images/container.png", true, "albedo");
-	Texture2D albedoTexture = ResourceManager::GetTexture2D("albedo");
+	ResourceManager::LoadTexture2D("src/assets/images/wood.png", false, "wood");
 	// ==================================================================================================
 
 	Renderer::SetCamera(camera);
@@ -315,14 +316,9 @@ int main(void)
 		albedo->setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
 		albedo->setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
 
-		////bpModel.Draw(unlit);
-		//Renderer::RenderScene();
-
-
-
 		// bind Texture
-		glActiveTexture(GL_TEXTURE0);
-		albedoTexture.Bind();
+		//glActiveTexture(GL_TEXTURE0);
+		//albedoTexture.Bind();
 
 		Renderer::RenderScene();
 
@@ -434,6 +430,37 @@ int main(void)
 					if (ImGui::Selectable(selID))
 					{
 						ResourceManager::SelectObject(current->objectID);
+					}
+
+					ImGui::PopID();
+				}
+				ImGui::TreePop();
+			}
+			ImGui::End();
+		}
+
+		{
+			ImGui::Begin("SelectTexture");
+			if (ImGui::TreeNode("Textures"))
+			{
+				for (auto& current : ResourceManager::texture2DMap)
+				{
+					if (!current.second)
+						continue;
+
+					ImGui::PushID(current.first.c_str());
+					const char* selID = current.first.c_str();
+					if (ImGui::Selectable(selID))
+					{
+						cTexture = current.second;
+						if (currentObject)
+						{
+							Cube* c = dynamic_cast<Cube*>(currentObject);
+							if (c)
+							{
+								c->texture = cTexture;
+							}
+						}
 					}
 
 					ImGui::PopID();

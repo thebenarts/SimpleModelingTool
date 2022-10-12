@@ -35,7 +35,7 @@ public:
 
 	// resource storage
 	static std::map<std::string, Shader*> shadersMap;
-	static std::map<std::string, Texture2D> texture2DMap;
+	static std::map<std::string, Texture2D*> texture2DMap;
 	static std::vector<Object*>objects;
 	static std::vector<PointLight*> pointLights;
 	static std::vector<SpotLight*> spotLights;
@@ -47,9 +47,9 @@ public:
 	// retrieves stored shader
 	static Shader* GetShader(std::string name);
 	// loads (and generates) a texture2D from file
-	static Texture2D LoadTexture2D(const char* file, bool alpha, std::string name);
+	static Texture2D* LoadTexture2D(const char* file, bool alpha, std::string name);
 	// retrieves stored texture2D
-	static Texture2D& GetTexture2D(std::string name);
+	static Texture2D* GetTexture2D(std::string name);
 
 	// properly de-allocates all loaded resources
 	static void Clear();
@@ -82,7 +82,7 @@ private:
 	static Shader* loadShaderFromFile(const char* vShaderFile, const char* fShaderFile, const char* gShaderFile = nullptr);
 
 	// loads a single texture from file
-	static Texture2D loadTextureFromFile(const char* file, bool alpha);
+	static Texture2D* loadTextureFromFile(const char* file, bool alpha);
 
 	static unsigned int FindNextObjectID();
 };

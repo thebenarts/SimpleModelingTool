@@ -20,6 +20,7 @@ Cube::Cube()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	scale = glm::vec3(1.0f);
+	texture = nullptr;
 }
 
 void Cube::Draw(Shader* shader) {
@@ -36,6 +37,13 @@ void Cube::Draw(Shader* shader) {
 	shader->setMat4("model", model);
 	shader->setUInt("resourceID", objectID);
 
+	if (texture)
+	{
+		glActiveTexture(GL_TEXTURE0);
+		texture->Bind();
+		shader->setInt("albedo", 0);
+	}
+
 	glBindVertexArray(VAO);
 
 	glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -43,8 +51,6 @@ void Cube::Draw(Shader* shader) {
 	
 	// not true yet
 	// glDrawArrays is gonna be called from Renderer
-
-
 }
 
 void Cube::SetCubeScale(glm::vec3 newScale)
