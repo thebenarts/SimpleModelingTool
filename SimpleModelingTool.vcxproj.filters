@@ -162,5 +162,7 @@
     <None Include="src\shaders\outline\outline.vert" />
     <None Include="src\shaders\multipleLights\multipleLights.frag" />
     <None Include="src\shaders\multipleLights\multipleLights.vert" />
+    <None Include="src\shaders\billboard\billboard.vert" />
+    <None Include="src\shaders\billboard\billboard.frag" />
   </ItemGroup>
 </Project>

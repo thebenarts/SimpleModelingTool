@@ -19,6 +19,7 @@ std::priority_queue<unsigned int, std::deque<unsigned int>, std::greater<unsigne
 std::priority_queue<unsigned int, std::deque<unsigned int>, std::greater<unsigned int>>ResourceManager::freeSpotLightID;
 std::vector<PointLight*> ResourceManager::pointLights(50, nullptr);
 std::vector<SpotLight*> ResourceManager::spotLights(50, nullptr);
+Camera* ResourceManager::currentCamera;
 
 unsigned int ResourceManager::resourceID = 0;
 unsigned int ResourceManager::selectedID = 0;

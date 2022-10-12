@@ -15,6 +15,7 @@
 #include "object.h"
 #include "point_light.h"
 #include "spotLight.h"
+#include "Camera.h"
 
 // RESOURCE MANAGER Stores all Shaders, Textures
 
@@ -42,6 +43,7 @@ public:
 	static std::priority_queue<unsigned int, std::deque<unsigned int>, std::greater<unsigned int>> freeObjectID;
 	static std::priority_queue<unsigned int, std::deque<unsigned int>, std::greater<unsigned int>> freePointLightID;
 	static std::priority_queue<unsigned int, std::deque<unsigned int>, std::greater<unsigned int>> freeSpotLightID;
+	static Camera* currentCamera;
 	// loads (and generates) a shader program from file loading vertex, fragment (and geometry) shadrer's source code.
 	static Shader* LoadShader(std::string name, const char* vShaderfile, const char* fShaderFile, const char* gShaderFile);
 	// retrieves stored shader
