@@ -183,8 +183,8 @@ int main(void)
 	ResourceManager::LoadShader("guideGrid", "src/shaders/grid/gridGuide.vert", "src/shaders/grid/gridGuide.frag", nullptr);
 	ResourceManager::LoadShader("albedo", "src/shaders/DirLight/dirLight.vert", "src/shaders/albedo/albedo.frag", nullptr);
 	ResourceManager::LoadShader("outline", "src/shaders/outline/outline.vert", "src/shaders/outline/outline.frag", nullptr);
-	
-	
+	ResourceManager::LoadShader("mLights", "src/shaders/multipleLights/multipleLights.vert", "src/shaders/multipleLights/multipleLights.frag", nullptr);
+
 	std::vector<std::string> shapes{ "PLANE", "CUBE", "SPHERE"};
 	std::vector<std::string> lightTypes{ "PointLight", "SpotLight" };
 
@@ -480,10 +480,6 @@ int main(void)
 							{
 								c->texture = cTexture;
 							}
-							//Light* pl = dynamic_cast<Light*>(currentObject);
-							//if (pl) {
-							//	pl->texture = cTexture;
-							//}
 						}
 					}
 
