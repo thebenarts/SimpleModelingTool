@@ -230,6 +230,20 @@ unsigned int ResourceManager::SelectObject(unsigned int objectID)
 void ResourceManager::RemoveObject()
 {
 	Object* objectToRemove = GetSelectedObject();
+
+	if (PointLight* pLight = dynamic_cast<PointLight*>(objectToRemove))
+	{
+		int dID = pLight->pointLightID;
+		pointLights[dID] = nullptr;
+		freePointLightID.push(dID);
+	}
+	else if(SpotLight* sLight = dynamic_cast<SpotLight*>(objectToRemove))
+	{
+		int dID = sLight->spotLightID;
+		spotLights[dID] = nullptr;
+		freeSpotLightID.push(dID);
+	}
+
 	if (objectToRemove)
 	{
 		int dID = objectToRemove->objectID;

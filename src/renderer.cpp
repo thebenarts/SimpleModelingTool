@@ -119,7 +119,7 @@ void Renderer::RenderScene()
 	//dirLight properties
 	dirLight->setVec3("dirLight.direction", glm::vec3(Renderer::currentCamera->Front));
 	dirLight->setVec3("dirLight.ambient", 0.1f, 0.1f, 0.1f);
-	dirLight->setVec3("dirLight.diffuse", 0.3f, 0.3f, 0.3f);
+	dirLight->setVec3("dirLight.diffuse", 0.2f, 0.2f, 0.2f);
 
 	// fill up the point light data
 	for (int i = 0; i < ResourceManager::pointLights.size(); ++i)
