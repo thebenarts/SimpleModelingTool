@@ -10,6 +10,7 @@ in VS_OUT{
 
 uniform vec3 viewPos;
 uniform sampler2D albedo;
+uniform unsigned int resourceID;
 
 struct DirLight{
 	vec3 direction;
@@ -87,6 +88,7 @@ void main()
     }
 
     FragColor = vec4(result, 1.0);
+    selectionID = int(resourceID);
 }
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
@@ -95,8 +97,8 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 
     float diff = max(dot(normal, lightDir),0.0);
 
-    vec3 ambient = light.ambient * vec3(texture(albedo, TexCoords));
-    vec3 diffuse = light.diffuse * diff * vec3(texture(albedo, TexCoords));
+    vec3 ambient = light.ambient * vec3(texture(albedo, vs_in.TexCoords));
+    vec3 diffuse = light.diffuse * diff * vec3(texture(albedo, vs_in.TexCoords));
 
     return (ambient + diffuse);
 }
@@ -109,8 +111,8 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     float distance = length(light.position - fragPos);
     float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
 
-    vec3 ambient = light.ambient * vec3(texture(albedo, TexCoords));
-    vec3 diffuse = light.diffuse *  diff * vec3(texture(albedo, TexCoords));
+    vec3 ambient = light.ambient * vec3(texture(albedo, vs_in.TexCoords));
+    vec3 diffuse = light.diffuse *  diff * vec3(texture(albedo, vs_in.TexCoords));
 
     ambient *= attenuation;
     diffuse *= attenuation;
@@ -131,8 +133,8 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     float epsilon = light.innerCutOff - light.outerCutOff;
     float intensity = clamp((theta - light.outerCutOff)/epsilon, 0.0,1.0);
 
-    vec3 ambient = light.ambient * vec3(texture(albedo, TexCoords));
-    vec3 diffuse = light.diffuse * diff * vec3(texture(albedo, TexCoords));
+    vec3 ambient = light.ambient * vec3(texture(albedo, vs_in.TexCoords));
+    vec3 diffuse = light.diffuse * diff * vec3(texture(albedo, vs_in.TexCoords));
 
    ambient *= attenuation * intensity;
    diffuse *= attenuation * intensity;
