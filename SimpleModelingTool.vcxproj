@@ -209,6 +209,8 @@
     <None Include="src\shaders\DirLight\dirLight.frag" />
     <None Include="src\shaders\grid\gridGuide.frag" />
     <None Include="src\shaders\grid\gridGuide.vert" />
+    <None Include="src\shaders\multipleLights\multipleLights.frag" />
+    <None Include="src\shaders\multipleLights\multipleLights.vert" />
     <None Include="src\shaders\outline\outline.frag" />
     <None Include="src\shaders\outline\outline.vert" />
     <None Include="src\shaders\unlit\unlit.frag" />
