@@ -145,11 +145,11 @@ void Renderer::RenderScene()
 	}
 
 	// fill up the spot light data
-	for (int i = 0; i < ResourceManager::pointLights.size(); ++i)
+	for (int i = 0; i < ResourceManager::spotLights.size(); ++i)
 	{
 		std::string number = std::to_string(i);
 
-		if (ResourceManager::pointLights[i])
+		if (ResourceManager::spotLights[i])
 		{
 			dirLight->setVec3("spotLights[" + number + "].position", ResourceManager::spotLights[i]->GetObjectLocation());
 			dirLight->setVec3("spotLights[" + number + "].direction", ResourceManager::spotLights[i]->direction);

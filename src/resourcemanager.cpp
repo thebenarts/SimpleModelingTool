@@ -268,7 +268,7 @@ unsigned int ResourceManager::GetandAddResourceID(Object* inObject)
 unsigned int ResourceManager::GetandAddPointLightID(PointLight* light) {
 	if (ResourceManager::freePointLightID.empty()) 
 	{
-		ResourceManager::pointLights.push_back(light);
+		ResourceManager::pointLights[pointLightID] = light;
 		return pointLightID++;
 	}
 	unsigned int lightID = ResourceManager::freePointLightID.top();
