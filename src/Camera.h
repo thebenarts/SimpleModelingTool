@@ -3,7 +3,7 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
+#include<iostream>
 #include <vector>
 
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
@@ -26,7 +26,7 @@ const float YAW = -90.f;
 const float PITCH = 0.0f;
 const float SPEED = 2.5f;
 const float SENSITIVITY = 0.1f;
-const float ZOOM = 45.f;
+const float ZOOM = 45.0f;
 
 // An abstract camera class that processses input and calculates the corresponding Euler Angles, vectors and matrices for use in OpenGL
 
@@ -128,7 +128,7 @@ public:
 	void UpdateCameraProjectionMatrix()
 	{
 		if (lensType == PERSPECTIVE)
-			projectionMatrice = glm::perspective(FieldOfView, (float)screenWidth / (float)screenHeight, nearPlane, farPlane);
+			projectionMatrice = glm::perspective(glm::radians(FieldOfView), (float)screenWidth / (float)screenHeight, nearPlane, farPlane);
 		else
 			projectionMatrice = glm::ortho(0.0f, (float)screenWidth, 0.0f, (float)screenHeight);
 	}
@@ -174,8 +174,8 @@ public:
 		FieldOfView -= (float)yoffset;
 		if (FieldOfView < 1.0f)
 			FieldOfView = 1.0f;
-		if (FieldOfView > 100.f)
-			FieldOfView = 100.f;
+		if (FieldOfView > 100.0f)
+			FieldOfView = 100.0f;
 
 		if(lensType == PERSPECTIVE)
 		UpdateCameraProjectionMatrix();
