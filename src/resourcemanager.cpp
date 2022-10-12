@@ -14,10 +14,16 @@
 std::map<std::string, Texture2D> ResourceManager::texture2DMap;
 std::map<std::string, Shader*> ResourceManager::shadersMap;
 std::vector<Object*>ResourceManager::objects;
-std::priority_queue<unsigned int, std::deque<unsigned int>, std::greater<unsigned int>>ResourceManager::freeID;
+std::priority_queue<unsigned int, std::deque<unsigned int>, std::greater<unsigned int>>ResourceManager::freeObjectID;
+std::priority_queue<unsigned int, std::deque<unsigned int>, std::greater<unsigned int>>ResourceManager::freePointLightID;
+std::priority_queue<unsigned int, std::deque<unsigned int>, std::greater<unsigned int>>ResourceManager::freeSpotLightID;
+std::vector<PointLight*> ResourceManager::pointLights(50, nullptr);
+std::vector<SpotLight*> ResourceManager::spotLights(50, nullptr);
 
 unsigned int ResourceManager::resourceID = 0;
 unsigned int ResourceManager::selectedID = 0;
+unsigned int ResourceManager::pointLightID = 0;
+unsigned int ResourceManager::spotLightID = 0;
 
 Shader* ResourceManager::GetShader(std::string name)
 {
@@ -210,7 +216,7 @@ unsigned int ResourceManager::SelectObject(unsigned int objectID)
 
 	// should probably check in freeID as well but for now it should be alright 
 	if(ResourceManager::objects[objectID])
-	ResourceManager::objects[objectID]->bSelected = true;
+		ResourceManager::objects[objectID]->bSelected = true;
 	ResourceManager::selectedID = objectID;
 
 	return objectID;
@@ -222,7 +228,7 @@ void ResourceManager::RemoveObject()
 	if (objectToRemove)
 	{
 		int dID = objectToRemove->objectID;
-		freeID.push(dID);
+		freeObjectID.push(dID);
 		delete objectToRemove;
 		objects[dID] = nullptr;
 	}
@@ -230,26 +236,70 @@ void ResourceManager::RemoveObject()
 
 unsigned int ResourceManager::GetResourceID()
 {
-	if (ResourceManager::freeID.empty())
+	if (ResourceManager::freeObjectID.empty())
 		return resourceID++;
 
-	unsigned int rID = ResourceManager::freeID.top();
-	freeID.pop();
+	unsigned int rID = ResourceManager::freeObjectID.top();
+	freeObjectID.pop();
 
 	return rID;
 }
 
 unsigned int ResourceManager::GetandAddResourceID(Object* inObject)
 {
-	if (ResourceManager::freeID.empty())
+	if (ResourceManager::freeObjectID.empty())
 	{
 		ResourceManager::objects.push_back(inObject);
 		return resourceID++;
 	}
 
-	unsigned int rID = ResourceManager::freeID.top();
-	freeID.pop();
+	unsigned int rID = ResourceManager::freeObjectID.top();
+	freeObjectID.pop();
 
 	ResourceManager::objects[rID] = inObject;
 	return rID;
+}
+
+unsigned int ResourceManager::GetandAddPointLightID(PointLight* light) {
+	if (ResourceManager::freePointLightID.empty()) 
+	{
+		ResourceManager::pointLights.push_back(light);
+		return pointLightID++;
+	}
+	unsigned int lightID = ResourceManager::freePointLightID.top();
+	freePointLightID.pop();
+	ResourceManager::pointLights[lightID] = light;
+	return lightID;
+}
+
+unsigned int ResourceManager::GetandAddSpotLightID(SpotLight* light) {
+	if (ResourceManager::freeSpotLightID.empty())
+	{
+		ResourceManager::spotLights[spotLightID]=light;
+		return spotLightID++;
+	}
+	unsigned int lightID = ResourceManager::freeSpotLightID.top();
+	freeSpotLightID.pop();
+	ResourceManager::spotLights[lightID] = light;
+	return lightID;
+}
+void ResourceManager::CreatePointLight()
+{
+	if (ResourceManager::freePointLightID.empty() && ResourceManager::pointLightID >= ResourceManager::pointLights.size()) 
+	{
+		std::cout << "ERROR::POINTLIGHT LIMIT REACHED (50)" << std::endl;
+		return;
+	}
+	PointLight* light = new PointLight();
+	SelectObject(light->objectID);
+}
+void ResourceManager::CreateSpotLight()
+{
+	if (ResourceManager::freeSpotLightID.empty() && ResourceManager::spotLightID >= ResourceManager::spotLights.size())
+	{
+		std::cout << "ERROR::SPOTLIGHT LIMIT REACHED (50)" << std::endl;
+		return;
+	}
+	SpotLight* light = new SpotLight();
+	SelectObject(light->objectID);
 }

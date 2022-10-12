@@ -17,7 +17,7 @@ void Renderer::RenderScene()
 		return;
 	}
 
-	Shader* dirLight = ResourceManager::GetShader("dirLight");
+	Shader* dirLight = ResourceManager::GetShader("albedo");
 	if (!dirLight)
 	{
 		std::cout << "SHADER::ERROR:: MISSING SHADER: IN RENDERER" << std::endl;

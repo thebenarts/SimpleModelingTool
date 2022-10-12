@@ -150,8 +150,8 @@ int main(void)
 
 
 	glEnable(GL_DEPTH_TEST);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDepthFunc(GL_LESS);
 	//stencil testing
 	glEnable(GL_STENCIL_TEST);
@@ -183,6 +183,7 @@ int main(void)
 	ResourceManager::LoadShader("albedo", "src/shaders/DirLight/dirLight.vert", "src/shaders/albedo/albedo.frag", nullptr);
 	ResourceManager::LoadShader("outline", "src/shaders/outline/outline.vert", "src/shaders/outline/outline.frag", nullptr);
 	std::vector<std::string> shapes{ "PLANE", "CUBE", "SPHERE"};
+	std::vector<std::string> lightTypes{ "PointLight", "SpotLight" };
 
 	//camera = new Camera(glm::vec3(-4.4f, 3.1f, 4.6f), glm::vec3(0.0f, 1.0f, 0.0f), -46.0f, -26.5f);
 
@@ -252,7 +253,6 @@ int main(void)
 	Shader* albedo = ResourceManager::GetShader("albedo");
 	Shader* outline = ResourceManager::GetShader("outline");
 	
-
 
 	// --------------------------------- LOAD TEXTURE ----------------------------------------------
 	ResourceManager::LoadTexture2D("src/assets/images/container.png", true, "albedo");

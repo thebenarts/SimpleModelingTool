@@ -181,6 +181,7 @@ public:
 		UpdateCameraProjectionMatrix();
 	}
 
+	// Orthographic / Perspective
 	void setLensType(Camera_ProjectionMode mode)
 	{
 		lensType = mode;
