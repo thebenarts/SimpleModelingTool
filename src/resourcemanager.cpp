@@ -131,6 +131,11 @@ void ResourceManager::CreateCube()
 	Cube* cObject = new Cube();
 	SelectObject(cObject->objectID);
 }
+void ResourceManager::CreateLight()
+{
+	PointLight* light = new PointLight();
+	SelectObject(light->objectID);
+}
 
 Object* ResourceManager::GetSelectedObject()
 {
@@ -293,6 +298,7 @@ void ResourceManager::CreatePointLight()
 	PointLight* light = new PointLight();
 	SelectObject(light->objectID);
 }
+
 void ResourceManager::CreateSpotLight()
 {
 	if (ResourceManager::freeSpotLightID.empty() && ResourceManager::spotLightID >= ResourceManager::spotLights.size())

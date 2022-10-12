@@ -183,6 +183,8 @@ int main(void)
 	ResourceManager::LoadShader("guideGrid", "src/shaders/grid/gridGuide.vert", "src/shaders/grid/gridGuide.frag", nullptr);
 	ResourceManager::LoadShader("albedo", "src/shaders/DirLight/dirLight.vert", "src/shaders/albedo/albedo.frag", nullptr);
 	ResourceManager::LoadShader("outline", "src/shaders/outline/outline.vert", "src/shaders/outline/outline.frag", nullptr);
+	
+	
 	std::vector<std::string> shapes{ "PLANE", "CUBE", "SPHERE"};
 	std::vector<std::string> lightTypes{ "PointLight", "SpotLight" };
 
@@ -258,6 +260,7 @@ int main(void)
 	// --------------------------------- LOAD TEXTURE ----------------------------------------------
 	ResourceManager::LoadTexture2D("src/assets/images/container.png", true, "albedo");
 	ResourceManager::LoadTexture2D("src/assets/images/wood.png", false, "wood");
+	ResourceManager::LoadTexture2D("src/assets/images/light.jpg", false, "light");
 	// ==================================================================================================
 
 	Renderer::SetCamera(camera);
@@ -413,6 +416,23 @@ int main(void)
 				}
 				ImGui::TreePop();
 			}
+			if (ImGui::TreeNode("Lights"))
+			{
+				for (int i = 0; i != 2; i++)
+				{
+					ImGui::PushID(i+shapes.size());
+					const char* selID = lightTypes[i].c_str();
+					if (ImGui::Selectable(selID))
+					{
+						selectedShape = i;
+						std::cout << selectedShape << std::endl;
+						ResourceManager::CreatePointLight();
+					}
+
+					ImGui::PopID();
+				}
+				ImGui::TreePop();
+			}
 			ImGui::End();
 		}
 
@@ -460,6 +480,10 @@ int main(void)
 							{
 								c->texture = cTexture;
 							}
+							//Light* pl = dynamic_cast<Light*>(currentObject);
+							//if (pl) {
+							//	pl->texture = cTexture;
+							//}
 						}
 					}
 

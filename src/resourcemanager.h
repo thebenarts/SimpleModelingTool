@@ -71,6 +71,7 @@ public:
 	static void RemoveObject();
 
 	static void CreateCube();
+	static void CreateLight();
 	static void CreatePointLight();
 	static void CreateSpotLight();
 
