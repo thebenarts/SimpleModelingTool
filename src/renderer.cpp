@@ -181,15 +181,17 @@ void Renderer::RenderScene()
 		return;
 	}
 
-
-	glStencilFunc(GL_ALWAYS, 1, 0xFF);
-	glStencilMask(0xFF);
+	// start Drawing
+	// -------------
+	
 	for (Object* currentObject : ResourceManager::objects)
 	{
 		if (!currentObject)
 			continue;
 
 		if (currentObject->bVisibility) {
+			glStencilFunc(GL_ALWAYS, 1, 0xFF);
+			glStencilMask(0xFF);
 			currentObject->Draw(dirLight);
 			if (currentObject->bSelected) {
 				Cube* selected = dynamic_cast<Cube*>(currentObject);
@@ -204,6 +206,7 @@ void Renderer::RenderScene()
 					outline->Use();
 					outline->setMat4("projection", Renderer::projection);
 					outline->setMat4("view", Renderer::view);
+					
 					// set stencil
 					glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
 					glStencilMask(0x00);
@@ -212,13 +215,11 @@ void Renderer::RenderScene()
 					selected->Draw(outline);
 					// set scale back to original
 					selected->SetCubeScale(pScale);
-					glEnable(GL_DEPTH_TEST);
 				}
 			}
 		}
+		glEnable(GL_DEPTH_TEST);
 	}
-
-	//Renderer::RenderGrid();
 
 	Renderer::RenderGrid();
 
