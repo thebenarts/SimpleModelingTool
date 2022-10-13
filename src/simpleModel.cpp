@@ -49,8 +49,7 @@ void Cube::Draw(Shader* shader) {
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 	
-	// not true yet
-	// glDrawArrays is gonna be called from Renderer
+	texture->unBind();
 }
 
 void Cube::SetCubeScale(glm::vec3 newScale)

@@ -39,7 +39,7 @@ void Light::Draw(Shader* shader)
 	shader->setMat4("view", view);
 	shader->setVec3("CameraRight_ws", glm::vec3(view[0][0], view[1][0], view[2][0]));
 	shader->setVec3("CameraUp_ws", glm::vec3(view[0][1], view[1][1], view[2][1]));
-	shader->setVec2("size", glm::vec2(1.0, 1.0));
+	shader->setVec2("size", glm::vec2(0.5, 0.5));
 
 	shader->setMat4("model", billboardTransform);
 	shader->setVec3("location", location);
