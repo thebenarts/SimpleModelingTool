@@ -165,16 +165,22 @@ unsigned int ResourceManager::FindNextObjectID()
 	}
 
 	if (ResourceManager::selectedID >= ResourceManager::objects.size() || ResourceManager::selectedID + 1 >= ResourceManager::objects.size())
-		return ResourceManager::selectedID = 0;
+	{
+		if (ResourceManager::objects[0])
+			return ResourceManager::selectedID = 0;
+	}
 	else
 		++ResourceManager::selectedID;
 
 	if (!ResourceManager::objects[selectedID])
 	{
-		++ResourceManager::selectedID;
+		
 		if (ResourceManager::selectedID > ResourceManager::resourceID)
+		{
+			if(ResourceManager::objects[0])
 			return ResourceManager::selectedID = 0;
-		while (ResourceManager::selectedID < ResourceManager::resourceID)
+		}
+		while (ResourceManager::selectedID < ResourceManager::objects.size())
 		{
 			if (ResourceManager::objects[ResourceManager::selectedID])
 				return ResourceManager::selectedID;
@@ -182,6 +188,16 @@ unsigned int ResourceManager::FindNextObjectID()
 			selectedID++;
 		}
 	}
+
+	if (ResourceManager::selectedID >= ResourceManager::objects.size())
+	{
+		ResourceManager::selectedID = 0;
+		return UINT_MAX;
+	}
+
+	if (!ResourceManager::objects[selectedID])
+		return UINT_MAX;
+
 	return ResourceManager::selectedID;
 }
 
@@ -252,6 +268,8 @@ void ResourceManager::RemoveObject()
 		delete objectToRemove;
 		objects[dID] = nullptr;
 	}
+
+
 }
 
 unsigned int ResourceManager::GetResourceID()

@@ -544,7 +544,7 @@ int main(void)
 			glReadPixels(mousePos.x, mousePos.y, 1, 1, GL_RED_INTEGER, GL_INT, &pColor);
 
 			selectedID = pColor;
-			std::cout << pColor << std::endl;
+			//std::cout << pColor << std::endl;
 			//ResourceManager::SelectObject(selID);
 
 			glReadBuffer(GL_NONE);
