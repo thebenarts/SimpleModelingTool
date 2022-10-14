@@ -167,6 +167,11 @@ int main(void)
 	bool bVertexNormalToggle = false;
 	float size = 1.0f;
 	float color[4] = { 0.8f, 0.3f, 0.02f, 1.0f };
+
+	// TEMP LightAttributes for imgui
+	float lightIntensity = 1.0f;
+	
+
 	//TODO : encapsualte geometry data
 	//float scale[3] = { 1.0,1.0,1.0 };
 	//float rotation[3] = { 0.0,0.0,0.0 };
@@ -358,7 +363,7 @@ int main(void)
 		ImGui::End();
 		
 		// --------------------------------------------------------------------------------------------------------------------------------------------------------------
-
+		ImGui::ShowDemoWindow();
 		// ImGUI window creation
 		ImGui::Begin("ToolBar");
 		// Text that appears in the window
@@ -395,8 +400,34 @@ int main(void)
 			if (currentObject)
 				currentObject->SetObjectRotation(rotation);
 		}
-		// Ends the window
 
+		Light* currobj = dynamic_cast<Light*>(currentObject);
+		if(currobj){
+			if (ImGui::BeginTabBar("MyTabBar"))
+			{
+				if (ImGui::BeginTabItem("Light"))
+				{
+					ImGui::Text("This is the Light tab!");
+					// Light intensity
+					
+					ImGui::SliderFloat("Intensity", &lightIntensity,0.0f,1.0f);
+					currobj->ambient = glm::vec3(lightIntensity);
+					// LightColor
+					ImGui::ColorEdit3("Color", &currobj->diffuse[0]);
+
+					ImGui::EndTabItem();
+				}
+
+				if (ImGui::BeginTabItem("Camera"))
+				{
+					ImGui::Text("This is the Camera tab!\nblah blah blah blah blah");
+					ImGui::EndTabItem();
+				}
+				ImGui::EndTabBar();
+			}
+		}
+
+		// Ends the window
 		ImGui::End();
 
 		{
@@ -595,7 +626,6 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 	if (!bViewPortActive)
 	{
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-			std::cout << "nice click" << std::endl;
 			ResourceManager::SelectObject(selectedID);
 	}
 }
