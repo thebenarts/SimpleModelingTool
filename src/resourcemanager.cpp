@@ -8,6 +8,8 @@
 #include <stb_image.h>
 #include "simpleModel.h"
 
+#include "renderer.h"
+
 
 // Instantiate static variables
 
@@ -20,6 +22,7 @@ std::priority_queue<unsigned int, std::deque<unsigned int>, std::greater<unsigne
 std::vector<PointLight*> ResourceManager::pointLights(50, nullptr);
 std::vector<SpotLight*> ResourceManager::spotLights(50, nullptr);
 Camera* ResourceManager::currentCamera;
+Camera* ResourceManager::defaultCamera;
 
 unsigned int ResourceManager::resourceID = 0;
 unsigned int ResourceManager::selectedID = 0;
@@ -138,6 +141,13 @@ void ResourceManager::CreateLight()
 	SelectObject(light->objectID);
 }
 
+Camera* ResourceManager::CreateCamera()
+{
+	Camera* camera = new Camera(glm::vec3(-4.4f, 3.1f, 4.6f), glm::vec3(0.0f, 1.0f, 0.0f), -46.0f, -26.5f);
+	SelectObject(camera->objectID);
+	return camera;
+}
+
 Object* ResourceManager::GetSelectedObject()
 {
 	if (ResourceManager::objects.empty())
@@ -204,7 +214,7 @@ unsigned int ResourceManager::FindNextObjectID()
 unsigned int ResourceManager::SelectNextObject()
 {
 	if (ResourceManager::selectedID <= ResourceManager::resourceID && ResourceManager::objects[ResourceManager::GetSelectedID()])
-		ResourceManager::objects[ResourceManager::GetSelectedID()]->bSelected = false;
+		ResourceManager::objects[ResourceManager::GetSelectedID()]->DeSelect();
 
 	if (UINT_MAX == ResourceManager::FindNextObjectID())
 	{
@@ -214,7 +224,7 @@ unsigned int ResourceManager::SelectNextObject()
 
 	// let the object know it's selected
 	if (ResourceManager::selectedID < ResourceManager::objects.size() && ResourceManager::objects[ResourceManager::selectedID])
-		ResourceManager::objects[ResourceManager::selectedID]->bSelected = true;
+		ResourceManager::objects[ResourceManager::selectedID]->Select();
 
 	return ResourceManager::selectedID;
 }
@@ -234,11 +244,11 @@ unsigned int ResourceManager::SelectObject(unsigned int objectID)
 	}
 
 	if (ResourceManager::selectedID < ResourceManager::objects.size() && ResourceManager::objects[ResourceManager::selectedID])
-		ResourceManager::objects[ResourceManager::selectedID]->bSelected = false;
+		ResourceManager::objects[ResourceManager::selectedID]->DeSelect();
 
 	// should probably check in freeID as well but for now it should be alright 
 	if(ResourceManager::objects[objectID])
-		ResourceManager::objects[objectID]->bSelected = true;
+		ResourceManager::objects[objectID]->Select();
 	ResourceManager::selectedID = objectID;
 
 	return objectID;
@@ -247,6 +257,9 @@ unsigned int ResourceManager::SelectObject(unsigned int objectID)
 void ResourceManager::RemoveObject()
 {
 	Object* objectToRemove = GetSelectedObject();
+
+	if (objectToRemove == ResourceManager::defaultCamera)
+		return;
 
 	if (PointLight* pLight = dynamic_cast<PointLight*>(objectToRemove))
 	{
@@ -341,4 +354,15 @@ void ResourceManager::CreateSpotLight()
 	}
 	SpotLight* light = new SpotLight();
 	SelectObject(light->objectID);
+}
+
+void ResourceManager::SetViewportCamera(Camera* camera)
+{
+	if (camera)
+		ResourceManager::currentCamera = camera;
+	else
+		ResourceManager::currentCamera = ResourceManager::defaultCamera;
+
+
+	Renderer::SetCamera(currentCamera);
 }

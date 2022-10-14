@@ -5,6 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include<iostream>
 #include <vector>
+#include "object.h"
 
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum Camera_Movement
@@ -30,7 +31,7 @@ const float ZOOM = 45.0f;
 
 // An abstract camera class that processses input and calculates the corresponding Euler Angles, vectors and matrices for use in OpenGL
 
-class Camera
+class Camera : public Object
 {
 public:
 	// camera attributes
@@ -74,6 +75,7 @@ public:
 		Pitch = pitch;
 		UpdateCameraProjectionMatrix();
 		UpdateCameraVectors();
+		objectName = "Camera" + std::to_string(objectID);
 	}
 
 	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), unsigned int scrWidth = 2560, unsigned int scrHeight = 1440, float nearP = 0.1f, float farP = 100.f, Camera_ProjectionMode projectionType = PERSPECTIVE, glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) :
@@ -93,6 +95,7 @@ public:
 		Pitch = pitch;
 		UpdateCameraProjectionMatrix();
 		UpdateCameraVectors();
+		objectName = "Camera" + std::to_string(objectID);
 	}
 
 	Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch , unsigned int scrWidth, unsigned int scrHeight, float nearP , float farP, Camera_ProjectionMode projectionType ) :
@@ -112,6 +115,7 @@ public:
 		Pitch = pitch;
 		UpdateCameraProjectionMatrix();
 		UpdateCameraVectors();
+		objectName = "Camera" + std::to_string(objectID);
 	}
 
 	// returns the view matrix calculated using euler angles and the lookAt matrix
@@ -144,6 +148,8 @@ public:
 			Position -= Right * velocity;
 		if (direction == RIGHT)
 			Position += Right * velocity;
+
+		location = Position;
 	}
 
 	// processes input received from a mouse input sytem. Expects the offset value in both the x and y direction
@@ -188,6 +194,10 @@ public:
 		UpdateCameraProjectionMatrix();
 	}
 
+	void Draw(Shader* shader) override;
+	void SetObjectLocation(glm::vec3 newLocation) override;
+	void Select()override;
+	void DeSelect()override;
 private:
 	void UpdateCameraVectors()
 	{

@@ -44,6 +44,8 @@ public:
 	static std::priority_queue<unsigned int, std::deque<unsigned int>, std::greater<unsigned int>> freePointLightID;
 	static std::priority_queue<unsigned int, std::deque<unsigned int>, std::greater<unsigned int>> freeSpotLightID;
 	static Camera* currentCamera;
+	static Camera* defaultCamera;
+
 	// loads (and generates) a shader program from file loading vertex, fragment (and geometry) shadrer's source code.
 	static Shader* LoadShader(std::string name, const char* vShaderfile, const char* fShaderFile, const char* gShaderFile);
 	// retrieves stored shader
@@ -70,12 +72,15 @@ public:
 
 	static unsigned int SelectObject(unsigned int objectID);
 
+	static void SetViewportCamera(Camera* camera);
+
 	static void RemoveObject();
 
 	static void CreateCube();
 	static void CreateLight();
 	static void CreatePointLight();
 	static void CreateSpotLight();
+	static Camera* CreateCamera();
 
 private:
 	// private constructor, that is we do not want any actual resource manager objects. Its members and functions should be publicly available(static)

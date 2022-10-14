@@ -194,14 +194,13 @@ void Renderer::RenderScene()
 			glStencilMask(0xFF);
 			currentObject->Draw(dirLight);
 			if (currentObject->bSelected) {
-				Cube* selected = dynamic_cast<Cube*>(currentObject);
-				if (selected) {
+				
 					// save data
-					glm::vec3 pLocation = selected->GetObjectLocation();
-					glm::vec3 pRotation = selected->GetObjectRotation();
-					glm::vec3 pScale = selected->GetCubeScale();
+					glm::vec3 pLocation = currentObject->GetObjectLocation();
+					glm::vec3 pRotation = currentObject->GetObjectRotation();
+					glm::vec3 pScale = currentObject->GetObjectScale();
 					// increase scale of selection to render as outline
-					selected->SetCubeScale(pScale * glm::vec3(1.02f));
+					currentObject->SetObjectScale(pScale * glm::vec3(1.02f));
 
 					outline->Use();
 					outline->setMat4("projection", Renderer::projection);
@@ -212,10 +211,10 @@ void Renderer::RenderScene()
 					glStencilMask(0x00);
 					glDisable(GL_DEPTH_TEST);
 
-					selected->Draw(outline);
+					currentObject->Draw(outline);
 					// set scale back to original
-					selected->SetCubeScale(pScale);
-				}
+					currentObject->SetObjectScale(pScale);
+				
 			}
 		}
 		glEnable(GL_DEPTH_TEST);

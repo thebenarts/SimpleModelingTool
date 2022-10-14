@@ -8,17 +8,13 @@ class Cube : public Object {
 public:
 	Cube();
 
-	glm::vec3 scale;
-
 	Texture2D* texture;
 
 	unsigned int VAO;
 	unsigned int VBO;
 
-	glm::vec3 GetCubeScale();
-	void SetCubeScale(glm::vec3 newScale);
-
 	void Draw(Shader* shader) override;
+	void Select()override;
 
 private:
 		std::vector<float> vertices = {

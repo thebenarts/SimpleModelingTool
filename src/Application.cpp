@@ -43,7 +43,7 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 // Camera
-Camera* camera = new Camera(glm::vec3(-4.4f, 3.1f, 4.6f), glm::vec3(0.0f, 1.0f, 0.0f), -46.0f, -26.5f);
+//Camera* camera = new Camera(glm::vec3(-4.4f, 3.1f, 4.6f), glm::vec3(0.0f, 1.0f, 0.0f), -46.0f, -26.5f);
 
 float lastX = (float)SRC_WIDTH / 2.f, lastY = (float)SRC_HEIGHT / 2.f;
 bool bFirstMouse = true;
@@ -170,17 +170,7 @@ int main(void)
 
 	// TEMP LightAttributes for imgui
 	float lightIntensity = 1.0f;
-	
 
-	//TODO : encapsualte geometry data
-	//float scale[3] = { 1.0,1.0,1.0 };
-	//float rotation[3] = { 0.0,0.0,0.0 };
-	//float lightDirection[3] = { -2.2, -4.0, -3.3 };
-
-	//Shader unlit("src/shaders/unlit/unlit.vert", "src/shaders/unlit/unlit.frag");
-	//Shader dirLight("src/shaders/DirLight/dirLight.vert", "src/shaders/DirLight/dirLight.frag");
-	//Shader visNormals("src/shaders/visualizeNormals/visualizeNormals.vert", "src/shaders/visualizeNormals/visualizeNormals.frag", "src/shaders/visualizeNormals/visualizeNormals.geom");
-	//Shader guideGrid("src/shaders/grid/gridGuide.vert", "src/shaders/grid/gridGuide.frag");
 
 	ResourceManager::LoadShader("unlit", "src/shaders/unlit/unlit.vert", "src/shaders/unlit/unlit.frag", nullptr);
 	ResourceManager::LoadShader("dirLight", "src/shaders/DirLight/dirLight.vert", "src/shaders/DirLight/dirLight.frag", nullptr);
@@ -191,7 +181,7 @@ int main(void)
 	ResourceManager::LoadShader("mLights", "src/shaders/multipleLights/multipleLights.vert", "src/shaders/multipleLights/multipleLights.frag", nullptr);
 	ResourceManager::LoadShader("billboard", "src/shaders/billboard/billboard.vert", "src/shaders/billboard/billboard.frag", nullptr);
 
-	std::vector<std::string> shapes{ "PLANE", "CUBE", "SPHERE"};
+	std::vector<std::string> shapes{ "PLANE", "CUBE", "SPHERE", "CAMERA"};
 	std::vector<std::string> lightTypes{ "PointLight", "SpotLight" };
 
 	//camera = new Camera(glm::vec3(-4.4f, 3.1f, 4.6f), glm::vec3(0.0f, 1.0f, 0.0f), -46.0f, -26.5f);
@@ -269,8 +259,10 @@ int main(void)
 	ResourceManager::LoadTexture2D("src/assets/images/light.jpg", false, "light");
 	// ==================================================================================================
 
-	Renderer::SetCamera(camera);
-	ResourceManager::currentCamera = camera;
+	ResourceManager::defaultCamera = ResourceManager::CreateCamera();
+	ResourceManager::defaultCamera->objectName = "DefaultCamera";
+	Renderer::SetCamera(ResourceManager::defaultCamera);
+	ResourceManager::currentCamera = ResourceManager::defaultCamera;
 
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
@@ -310,18 +302,15 @@ int main(void)
 		{
 			location = currentObject->GetObjectLocation();
 			rotation = currentObject->GetObjectRotation();
-
-			Cube* currentCube = static_cast<Cube*>(currentObject);
-			if (currentCube)
-				scale = currentCube->GetCubeScale();
+			scale = currentObject->GetObjectScale();
 		}
 
 		////DIRLIGHT
 		//if (bDirLightToggle) {
 			//lightshade
 		albedo->Use();
-		albedo->setVec3("light.direction", glm::vec3(camera->Front));
-		albedo->setVec3("viewPos", camera->Position);
+		albedo->setVec3("light.direction", glm::vec3(ResourceManager::currentCamera->Front));
+		albedo->setVec3("viewPos", ResourceManager::currentCamera->Position);
 		//light properties
 		albedo->setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
 		albedo->setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
@@ -388,11 +377,7 @@ int main(void)
 		if (ImGui::DragFloat3("Scale", &scale[0]))
 		{
 			if (currentObject)
-			{
-				Cube* currentCube = static_cast<Cube*>(currentObject);
-				if (currentCube)
-					currentCube->SetCubeScale(scale);
-			}
+				currentObject->SetObjectScale(scale);
 		}
 		// Fancy editor Rotation
 		if (ImGui::DragFloat3("Rotation", &rotation[0]))
@@ -434,7 +419,7 @@ int main(void)
 			ImGui::Begin("AddPrimitiveShapes");
 			if (ImGui::TreeNode("Shapes"))
 			{
-				for (int i = 0; i != 3; i++)
+				for (int i = 0; i != 4; i++)
 				{
 					ImGui::PushID(i);
 					const char* selID = shapes[i].c_str();
@@ -442,7 +427,10 @@ int main(void)
 					{
 						selectedShape = i;
 						std::cout << selectedShape << std::endl;
-						ResourceManager::CreateCube();
+						if (i == 1)
+							ResourceManager::CreateCube();
+						else if (i == 3)
+							ResourceManager::CreateCamera();
 					}
 
 					ImGui::PopID();
@@ -638,7 +626,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 }
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-	camera->ProcessMouseScroll(static_cast<float>(yoffset));
+	ResourceManager::currentCamera->ProcessMouseScroll(static_cast<float>(yoffset));
 }
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -680,17 +668,22 @@ void processInput(GLFWwindow* window)
 	{
 		if (uState == Normal)
 		{
-			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-				camera->ProcessKeyboard(FORWARD, deltaTime);
+			if (ResourceManager::currentCamera)
+			{
 
-			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-				camera->ProcessKeyboard(BACKWARD, deltaTime);
+				if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+					ResourceManager::currentCamera->ProcessKeyboard(FORWARD, deltaTime);
 
-			if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-				camera->ProcessKeyboard(LEFT, deltaTime);
+				if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+					ResourceManager::currentCamera->ProcessKeyboard(BACKWARD, deltaTime);
 
-			if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-				camera->ProcessKeyboard(RIGHT, deltaTime);
+				if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+					ResourceManager::currentCamera->ProcessKeyboard(LEFT, deltaTime);
+
+				if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+					ResourceManager::currentCamera->ProcessKeyboard(RIGHT, deltaTime);
+
+			}
 
 			if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
 			{
@@ -737,7 +730,8 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 
 	if (uState == Normal && bViewPortActive)
 	{
-		camera->ProcessMouseMovement(xoffset, yoffset);
+		if(ResourceManager::currentCamera)
+		ResourceManager::currentCamera->ProcessMouseMovement(xoffset, yoffset);
 	}
 
 	if (uState == Move && bViewPortActive)

@@ -18,12 +18,18 @@ class Object
 
 		glm::vec3 GetObjectLocation();
 		glm::vec3 GetObjectRotation();
+		glm::vec3 GetObjectScale();
 
-		void SetObjectLocation(glm::vec3 newLocation);
-		void SetObjectRotation(glm::vec3 newRotation);
+		virtual void SetObjectLocation(glm::vec3 newLocation);
+		virtual void SetObjectRotation(glm::vec3 newRotation);
+		virtual void SetObjectScale(glm::vec3 newScale);
+
+		virtual void Select();
+		virtual void DeSelect();
 
 	protected:
 	glm::vec3 location;
 	glm::vec3 rotation;
+	glm::vec3 scale;
 
 };

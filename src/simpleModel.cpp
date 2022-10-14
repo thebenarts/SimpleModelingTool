@@ -52,12 +52,7 @@ void Cube::Draw(Shader* shader) {
 	texture->unBind();
 }
 
-void Cube::SetCubeScale(glm::vec3 newScale)
+void Cube::Select()
 {
-	scale = newScale;
-}
-
-glm::vec3 Cube::GetCubeScale()
-{
-	return scale;
+	bSelected = true;
 }
