@@ -186,6 +186,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\command.h" />
     <ClInclude Include="src\light.h" />
     <ClInclude Include="src\mesh.h" />
     <ClInclude Include="src\model.h" />
@@ -198,6 +199,7 @@
     <ClInclude Include="src\simpleModel.h" />
     <ClInclude Include="src\spotLight.h" />
     <ClInclude Include="src\texture.h" />
+    <ClInclude Include="src\vec3Command.h" />
     <ClInclude Include="src\vendor\stb_image\include\stb_image.h" />
     <ClInclude Include="src\vendor\imgui\include\imconfig.h" />
     <ClInclude Include="src\vendor\imgui\include\imgui.h" />

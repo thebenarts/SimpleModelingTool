@@ -19,6 +19,9 @@
 #include "renderer.h"
 #include "simpleModel.h"
 
+#include <stack>
+#include "vec3Command.h"
+
 #include <GLFW/glfw3.h>
 // RUN THIS ON X64
 // This is a test change
@@ -58,6 +61,8 @@ glm::vec3 location = glm::vec3(0.0f);
 glm::vec3 rotation = glm::vec3(0.0f);
 glm::vec3 scale = glm::vec3(1.0f);
 
+glm::vec3 ogLocation = glm::vec3(0.0f);
+
 glm::vec2 viewportSize;
 glm::vec2 viewportBounds[2];
 Texture2D* cTexture;
@@ -75,6 +80,8 @@ enum userState
 float interactX = lastX;
 
 userState uState = Normal;
+
+std::stack<ICommand*> undoStack;
 
 int main(void)
 {
@@ -298,6 +305,7 @@ int main(void)
 
 		//--------------------------------------------------------------------------------------------------------------------------------
 		Object* currentObject = ResourceManager::GetSelectedObject();
+
 		if (currentObject)
 		{
 			location = currentObject->GetObjectLocation();
@@ -352,7 +360,7 @@ int main(void)
 		ImGui::End();
 		
 		// --------------------------------------------------------------------------------------------------------------------------------------------------------------
-		ImGui::ShowDemoWindow();
+		//ImGui::ShowDemoWindow();
 		// ImGUI window creation
 		ImGui::Begin("ToolBar");
 		// Text that appears in the window
@@ -373,6 +381,14 @@ int main(void)
 			if (currentObject)
 				currentObject->SetObjectLocation(location);
 		}
+		if (ImGui::IsItemActivated())
+			ogLocation = currentObject->GetObjectLocation();
+		if (ImGui::IsItemDeactivated())
+		{
+			if (ogLocation != location)
+				undoStack.push(new MoveCommand(currentObject, ogLocation, location));
+		}
+
 		// Fancy editor Scale
 		if (ImGui::DragFloat3("Scale", &scale[0]))
 		{
@@ -624,10 +640,12 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	SRC_WIDTH = width;
 	SRC_HEIGHT = height;
 }
+
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	ResourceManager::currentCamera->ProcessMouseScroll(static_cast<float>(yoffset));
 }
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -657,7 +675,17 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
 		ResourceManager::RemoveObject();
 
+	if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+	{
+		if (!undoStack.empty())
+		{
+			std::cout << "STACK IS PERFORMING UNDO" << std::endl;
+			undoStack.top()->Undo();
+			undoStack.pop();
+		}
+	}
 }
+
 void processInput(GLFWwindow* window)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
