@@ -69,16 +69,23 @@ public:
 	static unsigned int GetandAddResourceID(Object* inObject);
 	static unsigned int GetandAddPointLightID(PointLight* light);
 	static unsigned int GetandAddSpotLightID(SpotLight* light);
-
+	static void AddResourceID(Object* inObject);
+	static void AddPointID(PointLight* inObject);
+	static void AddSpotID(SpotLight* inObject);
+	static void RemoveResourceID(unsigned int inID);
+	static void RemovePointID(unsigned int inID);
+	static void RemoveSpotID(unsigned int inID);
+	static void RemoveObject();
 	//------------------------------------------- OBJECT SELECTION-----------------------------------------------------
 	static unsigned int GetSelectedID() { return selectedID; }
 	static Object* GetSelectedObject();
 	static unsigned int SelectNextObject();
 	static unsigned int SelectObject(unsigned int objectID);
+	static Object* GetObject(unsigned int objectID);
 	static void SetViewportCamera(Camera* camera);
 
 	//------------------------------------------- OBJECT CREATION AND DESTRUCTION-----------------------------------------------------
-	static void RemoveObject();
+	//static void RemoveObject();
 	static void CreateCube();
 	static void CreateLight();
 	static void CreatePointLight();

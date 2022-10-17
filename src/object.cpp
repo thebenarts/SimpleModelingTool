@@ -11,6 +11,12 @@ bVisibility(true)
 	objectName = "Object" + std::to_string(objectID);
 }
 
+Object::~Object()
+{
+	ResourceManager::objects[objectID] = nullptr;
+	ResourceManager::freeObjectID.push(objectID);
+}
+
 void Object::Draw(Shader* shader) {}
 
 
@@ -52,4 +58,14 @@ void Object::Select()
 void Object::DeSelect()
 {
 	bSelected = false;
+}
+
+void Object::AddID()
+{
+	ResourceManager::AddResourceID(this);
+}
+
+void Object::RemoveID()
+{
+	ResourceManager::RemoveResourceID(objectID);
 }

@@ -138,11 +138,13 @@ void ResourceManager::CreateCube()
 {
 	Cube* cObject = new Cube();
 	SelectObject(cObject->objectID);
+	new CreateCommand(cObject);
 }
 void ResourceManager::CreateLight()
 {
 	PointLight* light = new PointLight();
 	SelectObject(light->objectID);
+	new CreateCommand(light);
 }
 
 Camera* ResourceManager::CreateCamera()
@@ -238,13 +240,13 @@ unsigned int ResourceManager::SelectObject(unsigned int objectID)
 	if (ResourceManager::objects.empty())
 	{
 		std::cout << "ERROR::COULD NOT FIND SELECTED OBJECT";
-		return 0;
+		return UINT_MAX;			// changed from 0 to UINT_MAX should be fine but be careful
 	}
 
 	if (objectID > ResourceManager::resourceID)
 	{
 		std::cout << "ERROR::COULD NOT FIND SELECTED OBJECT";
-		return 0;
+		return UINT_MAX;			// changed from 0 to UINT_MAX should be fine but be careful
 	}
 
 	if (ResourceManager::selectedID < ResourceManager::objects.size() && ResourceManager::objects[ResourceManager::selectedID])
@@ -258,6 +260,48 @@ unsigned int ResourceManager::SelectObject(unsigned int objectID)
 	return objectID;
 }
 
+Object* ResourceManager::GetObject(unsigned int objectID)
+{
+	if (ResourceManager::objects.empty() || objectID > ResourceManager::resourceID)
+		return nullptr;
+
+	if (ResourceManager::objects[objectID])
+		return ResourceManager::objects[objectID];
+
+	return nullptr;
+}
+
+//void ResourceManager::RemoveObject()
+//{
+//	Object* objectToRemove = GetSelectedObject();
+//
+//	if (objectToRemove == ResourceManager::defaultCamera)
+//		return;
+//
+//	if (PointLight* pLight = dynamic_cast<PointLight*>(objectToRemove))
+//	{
+//		int dID = pLight->pointLightID;
+//		pointLights[dID] = nullptr;
+//		freePointLightID.push(dID);
+//	}
+//	else if(SpotLight* sLight = dynamic_cast<SpotLight*>(objectToRemove))
+//	{
+//		int dID = sLight->spotLightID;
+//		spotLights[dID] = nullptr;
+//		freeSpotLightID.push(dID);
+//	}
+//
+//	if (objectToRemove)
+//	{
+//		int dID = objectToRemove->objectID;
+//		freeObjectID.push(dID);
+//		delete objectToRemove;
+//		objects[dID] = nullptr;
+//	}
+//
+//
+//}
+
 void ResourceManager::RemoveObject()
 {
 	Object* objectToRemove = GetSelectedObject();
@@ -265,28 +309,7 @@ void ResourceManager::RemoveObject()
 	if (objectToRemove == ResourceManager::defaultCamera)
 		return;
 
-	if (PointLight* pLight = dynamic_cast<PointLight*>(objectToRemove))
-	{
-		int dID = pLight->pointLightID;
-		pointLights[dID] = nullptr;
-		freePointLightID.push(dID);
-	}
-	else if(SpotLight* sLight = dynamic_cast<SpotLight*>(objectToRemove))
-	{
-		int dID = sLight->spotLightID;
-		spotLights[dID] = nullptr;
-		freeSpotLightID.push(dID);
-	}
-
-	if (objectToRemove)
-	{
-		int dID = objectToRemove->objectID;
-		freeObjectID.push(dID);
-		delete objectToRemove;
-		objects[dID] = nullptr;
-	}
-
-
+	new RemoveCommand(objectToRemove);
 }
 
 unsigned int ResourceManager::GetResourceID()
@@ -428,4 +451,47 @@ void ResourceManager::HandleRedoCommand()
 		ResourceManager::redoStack.pop_back();
 		ResourceManager::AddUndo(currentCommand);
 	}
+}
+
+void ResourceManager::AddResourceID(Object* inObject)
+{
+	if (!inObject)
+		return;
+
+	if (!ResourceManager::objects[inObject->objectID])
+		ResourceManager::objects[inObject->objectID] = inObject;
+}
+
+void ResourceManager::AddPointID(PointLight* inObject)
+{
+	if (!inObject)
+		return;
+
+	if (!ResourceManager::pointLights[inObject->pointLightID])
+		ResourceManager::pointLights[inObject->pointLightID] = inObject;
+}
+
+void ResourceManager::AddSpotID(SpotLight* inObject)
+{
+	if (!inObject)
+		return;
+
+	if (!ResourceManager::spotLights[inObject->spotLightID])
+		ResourceManager::spotLights[inObject->spotLightID] = inObject;
+}
+
+void ResourceManager::RemoveResourceID(unsigned int inID)
+{
+	if(inID < ResourceManager::objects.size())
+		ResourceManager::objects[inID] = nullptr;
+}
+
+void ResourceManager::RemovePointID(unsigned int inID)
+{
+	ResourceManager::pointLights[inID] = nullptr;
+}
+
+void ResourceManager::RemoveSpotID(unsigned int inID)
+{
+	ResourceManager::spotLights[inID] = nullptr;
 }

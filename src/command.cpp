@@ -34,11 +34,100 @@ void MoveCommand::Undo()
 		targetObject->SetObjectLocation(originalVector);
 	}
 }
-//------------------------------------------------------------------ROTATE COMMAND--------------------------------------------------------------------------------
 
+//------------------------------------------------------------------CREATE COMMAND--------------------------------------------------------------------------------
+CreateCommand::CreateCommand(Object* inObject) : createdObject(inObject)
+{
+	if (!createdObject)
+		return;
 
+	Execute();
+	ResourceManager::RegisterNewCommand(this);
+}
+
+CreateCommand::~CreateCommand()
+{
+	// resourceManager check if the objects ID is nullptr if so delete the object
+	if (!ResourceManager::GetObject(createdObject->objectID))
+		delete createdObject;
+}
+
+void CreateCommand::Execute()
+{
+	if (!createdObject)
+		return;
+
+	createdObject->AddID();
+}
+
+void CreateCommand::Undo()
+{
+	if (!createdObject)
+		return;
+
+	createdObject->RemoveID();
+}
+
+//------------------------------------------------------------------REMOVE COMMAND--------------------------------------------------------------------------------
+
+RemoveCommand::RemoveCommand(Object* inObject) : objectToRemove(inObject)
+{
+	if (objectToRemove)
+	{
+		removeID = objectToRemove->objectID;
+		Execute();
+		ResourceManager::RegisterNewCommand(this);
+	}
+}
+
+RemoveCommand::RemoveCommand(int objectID) : removeID(objectID)
+{
+	objectToRemove = ResourceManager::GetObject(removeID);
+	if (objectToRemove)
+	{
+		Execute();
+		ResourceManager::RegisterNewCommand(this);
+	}
+}
+
+RemoveCommand::RemoveCommand()
+{
+	objectToRemove = ResourceManager::GetSelectedObject();
+
+	if (objectToRemove)
+	{
+		removeID = objectToRemove->objectID;
+		Execute();
+		ResourceManager::RegisterNewCommand(this);
+	}
+}
+
+void RemoveCommand::Execute()
+{
+	if (!objectToRemove)
+		return;
+
+	objectToRemove->RemoveID();
+}
+
+void RemoveCommand::Undo()
+{
+	if (!objectToRemove)
+		return;
+
+	objectToRemove->AddID();
+}
 
 RemoveCommand::~RemoveCommand()
 {
+	if (!objectToRemove)
+		return;
+
+	if (Object* other = ResourceManager::GetObject(objectToRemove->objectID))
+	{
+		if (other == objectToRemove)
+			return;
+	}
+
 	delete objectToRemove;
 }

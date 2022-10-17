@@ -129,13 +129,33 @@ private:
 	glm::vec3 originalVector;
 };
 
+class CreateCommand : public ICommand
+{
+public:
+	CreateCommand(Object* inObject);
+
+	virtual ~CreateCommand();
+
+	virtual void Execute() override;
+	virtual void Undo() override;
+
+private:
+	Object* createdObject;
+};
+
 class RemoveCommand : public ICommand
 {
-	RemoveCommand(Object* inObject) :
-		objectToRemove(inObject) {}
+public:
+	RemoveCommand(Object* inObject);
+	RemoveCommand(int objectID);
+	RemoveCommand();
 
 	virtual ~RemoveCommand();
 
+	virtual void Execute() override;
+	virtual void Undo() override;
+
 private:
 	Object* objectToRemove;
+	int removeID;
 };

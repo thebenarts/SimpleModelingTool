@@ -9,6 +9,8 @@ class Object
 	public:
 		Object();
 
+		virtual ~Object();
+
 		virtual void Draw(Shader* shader);
 
 		unsigned int objectID;
@@ -26,6 +28,10 @@ class Object
 
 		virtual void Select();
 		virtual void DeSelect();
+
+		virtual void AddID();
+		virtual void RemoveID();
+		
 
 	protected:
 	glm::vec3 location;
