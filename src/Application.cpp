@@ -20,7 +20,7 @@
 #include "simpleModel.h"
 
 #include <stack>
-#include "vec3Command.h"
+#include "command.h"
 
 #include <GLFW/glfw3.h>
 // RUN THIS ON X64
@@ -80,8 +80,6 @@ enum userState
 float interactX = lastX;
 
 userState uState = Normal;
-
-std::stack<ICommand*> undoStack;
 
 int main(void)
 {
@@ -386,7 +384,7 @@ int main(void)
 		if (ImGui::IsItemDeactivated())
 		{
 			if (ogLocation != location)
-				undoStack.push(new MoveCommand(currentObject, ogLocation, location));
+			new MoveCommand(currentObject, ogLocation, location);
 		}
 
 		// Fancy editor Scale
@@ -666,10 +664,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
 	{
-		if (colorRender == 0)
-			colorRender = 1;
-		else
-			colorRender = 0;
+		ResourceManager::HandleRedoCommand();
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
@@ -677,12 +672,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
 	{
-		if (!undoStack.empty())
-		{
-			std::cout << "STACK IS PERFORMING UNDO" << std::endl;
-			undoStack.top()->Undo();
-			undoStack.pop();
-		}
+		ResourceManager::HandleUndoCommand();
 	}
 }
 

@@ -9,7 +9,7 @@
 #include "simpleModel.h"
 
 #include "renderer.h"
-
+#include "command.h"
 
 // Instantiate static variables
 
@@ -28,6 +28,10 @@ unsigned int ResourceManager::resourceID = 0;
 unsigned int ResourceManager::selectedID = 0;
 unsigned int ResourceManager::pointLightID = 0;
 unsigned int ResourceManager::spotLightID = 0;
+
+std::deque<ICommand*>ResourceManager::undoStack;
+std::deque<ICommand*>ResourceManager::redoStack;
+
 
 Shader* ResourceManager::GetShader(std::string name)
 {
@@ -365,4 +369,63 @@ void ResourceManager::SetViewportCamera(Camera* camera)
 
 
 	Renderer::SetCamera(currentCamera);
+}
+
+void ResourceManager::AddUndo(ICommand* inCommand)
+{
+	if (ResourceManager::undoStack.size() == UNDO_STACK_MAXSIZE)
+		undoStack.pop_front();
+
+	undoStack.push_back(inCommand);
+}
+
+void ResourceManager::AddRedo(ICommand* inCommand)
+{
+	if (ResourceManager::redoStack.size() == UNDO_STACK_MAXSIZE)
+		redoStack.pop_front();
+
+	redoStack.push_back(inCommand);
+}
+
+void ResourceManager::ClearRedo()
+{
+	ResourceManager::redoStack.clear();
+}
+
+void ResourceManager::RegisterNewCommand(ICommand* inCommand)
+{
+	AddUndo(inCommand);
+	ClearRedo();
+}
+
+void ResourceManager::HandleUndoCommand()
+{
+	if (ResourceManager::undoStack.size())
+	{
+		ICommand* currentCommand = ResourceManager::undoStack.back();
+		if (!currentCommand)
+		{
+			std::cout << "ERROR::COMMAND WAS NULLPTR" << std::endl;
+			return ;
+		}
+		currentCommand->Undo();
+		ResourceManager::undoStack.pop_back();
+		ResourceManager::AddRedo(currentCommand);
+	}
+}
+
+void ResourceManager::HandleRedoCommand()
+{
+	if (ResourceManager::redoStack.size())
+	{
+		ICommand* currentCommand = ResourceManager::redoStack.back();
+		if (!currentCommand)
+		{
+			std::cout << "ERROR::COMMAND WAS NULLPTR" << std::endl;
+			return;
+		}
+		currentCommand->Execute();
+		ResourceManager::redoStack.pop_back();
+		ResourceManager::AddUndo(currentCommand);
+	}
 }

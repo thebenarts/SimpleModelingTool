@@ -10,6 +10,7 @@
 #include <fstream>
 
 #include <queue>
+#include <deque>
 #include "texture.h"
 #include "shader_m.h"
 #include "object.h"
@@ -18,7 +19,9 @@
 #include "Camera.h"
 
 // RESOURCE MANAGER Stores all Shaders, Textures
+class ICommand;
 
+#define UNDO_STACK_MAXSIZE 10
 
 // static singleton resourcemanager
 class ResourceManager
@@ -46,6 +49,9 @@ public:
 	static Camera* currentCamera;
 	static Camera* defaultCamera;
 
+	static std::deque<ICommand*> undoStack;
+	static std::deque<ICommand*> redoStack;
+
 	// loads (and generates) a shader program from file loading vertex, fragment (and geometry) shadrer's source code.
 	static Shader* LoadShader(std::string name, const char* vShaderfile, const char* fShaderFile, const char* gShaderFile);
 	// retrieves stored shader
@@ -58,29 +64,35 @@ public:
 	// properly de-allocates all loaded resources
 	static void Clear();
 	
+	//------------------------------------------- RESOURCE ID`s-----------------------------------------------------
 	static unsigned int GetResourceID();
-
 	static unsigned int GetandAddResourceID(Object* inObject);
 	static unsigned int GetandAddPointLightID(PointLight* light);
 	static unsigned int GetandAddSpotLightID(SpotLight* light);
 
+	//------------------------------------------- OBJECT SELECTION-----------------------------------------------------
 	static unsigned int GetSelectedID() { return selectedID; }
-
 	static Object* GetSelectedObject();
-
 	static unsigned int SelectNextObject();
-
 	static unsigned int SelectObject(unsigned int objectID);
-
 	static void SetViewportCamera(Camera* camera);
 
+	//------------------------------------------- OBJECT CREATION AND DESTRUCTION-----------------------------------------------------
 	static void RemoveObject();
-
 	static void CreateCube();
 	static void CreateLight();
 	static void CreatePointLight();
 	static void CreateSpotLight();
 	static Camera* CreateCamera();
+
+
+	//------------------------------------------- UNDO AND REDO-----------------------------------------------------
+	static void AddUndo(ICommand* inCommand);
+	static void AddRedo(ICommand* inCommand);
+	static void ClearRedo();
+	static void RegisterNewCommand(ICommand* inCommand);
+	static void HandleUndoCommand();
+	static void HandleRedoCommand();
 
 private:
 	// private constructor, that is we do not want any actual resource manager objects. Its members and functions should be publicly available(static)
