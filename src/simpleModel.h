@@ -8,6 +8,8 @@ class Cube : public Object {
 public:
 	Cube();
 
+	virtual ~Cube();
+
 	Texture2D* texture;
 
 	unsigned int VAO;

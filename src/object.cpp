@@ -3,7 +3,8 @@
 
 Object::Object() :
 objectID (ResourceManager::GetandAddResourceID(this)),
-bVisibility(true) 
+bVisibility(true),
+bRemoved(false)
 {
 	location = glm::vec3(0.0f);
 	rotation = glm::vec3(0.0f);
@@ -68,4 +69,9 @@ void Object::AddID()
 void Object::RemoveID()
 {
 	ResourceManager::RemoveResourceID(objectID);
+}
+
+void Object::FreeID()
+{
+	ResourceManager::FreeResourceID(objectID);
 }

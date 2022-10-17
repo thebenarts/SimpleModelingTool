@@ -75,6 +75,9 @@ public:
 	static void RemoveResourceID(unsigned int inID);
 	static void RemovePointID(unsigned int inID);
 	static void RemoveSpotID(unsigned int inID);
+	static void FreeResourceID(unsigned int inID);
+	static void FreePointID(unsigned int inID);
+	static void FreeSpotID(unsigned int inID);
 	static void RemoveObject();
 	//------------------------------------------- OBJECT SELECTION-----------------------------------------------------
 	static unsigned int GetSelectedID() { return selectedID; }

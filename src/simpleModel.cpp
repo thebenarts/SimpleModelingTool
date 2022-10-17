@@ -56,3 +56,9 @@ void Cube::Select()
 {
 	bSelected = true;
 }
+
+Cube::~Cube()
+{
+	Object::~Object();
+
+}

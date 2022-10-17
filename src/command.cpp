@@ -1,5 +1,6 @@
 #include "command.h"
 #include "resourcemanager.h"
+#include <memory>
 
 
 // basic functionality that has to be implemented by the Command classes
@@ -38,7 +39,7 @@ void MoveCommand::Undo()
 //------------------------------------------------------------------CREATE COMMAND--------------------------------------------------------------------------------
 CreateCommand::CreateCommand(Object* inObject) : createdObject(inObject)
 {
-	if (!createdObject)
+	if (!inObject)
 		return;
 
 	Execute();
@@ -47,9 +48,14 @@ CreateCommand::CreateCommand(Object* inObject) : createdObject(inObject)
 
 CreateCommand::~CreateCommand()
 {
+	if (!createdObject)
+		return;
+
 	// resourceManager check if the objects ID is nullptr if so delete the object
-	if (!ResourceManager::GetObject(createdObject->objectID))
+	if (!ResourceManager::GetObject(createdObject->objectID) && !createdObject->bRemoved)
+	{
 		delete createdObject;
+	}
 }
 
 void CreateCommand::Execute()
@@ -106,7 +112,7 @@ void RemoveCommand::Execute()
 {
 	if (!objectToRemove)
 		return;
-
+	objectToRemove->bRemoved = true;
 	objectToRemove->RemoveID();
 }
 
@@ -125,9 +131,9 @@ RemoveCommand::~RemoveCommand()
 
 	if (Object* other = ResourceManager::GetObject(objectToRemove->objectID))
 	{
-		if (other == objectToRemove)
 			return;
 	}
 
+	objectToRemove->FreeID();
 	delete objectToRemove;
 }

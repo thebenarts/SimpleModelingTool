@@ -28,3 +28,8 @@ void PointLight::RemoveID()
 	Object::RemoveID();
 	ResourceManager::RemovePointID(pointLightID);
 }
+void PointLight::FreeID()
+{
+	Object::FreeID();
+	ResourceManager::FreePointID(pointLightID);
+}
