@@ -7,6 +7,8 @@
 #include <vector>
 #include "object.h"
 
+class Camera;
+
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum Camera_Movement
 {
@@ -21,10 +23,7 @@ enum Camera_ProjectionMode
 	PERSPECTIVE,
 	ORTHOGRAPHIC
 };
-enum Camera_Control {
-	FLY,
-	ORBIT
-};
+
 enum Camera_Orbit {
 	ORBITING,		//if middlemouse held
 	STRAFING,		//if shift+mmb held
@@ -39,10 +38,57 @@ const float SENSITIVITY = 0.1f;
 const float ZOOM = 45.0f;
 
 // An abstract camera class that processses input and calculates the corresponding Euler Angles, vectors and matrices for use in OpenGL
+class CameraState
+{
+public:
+	virtual ~CameraState(){}
+	virtual void SetContext(Camera* inCamera) = 0;
+	virtual CameraState* SwapState() = 0;
+	virtual void ProcessKeyboard(Camera_Movement direction, float deltaTime) = 0;
+	virtual void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true) = 0;
+	virtual void ProcessMouseScroll(float yoffset) = 0;
+	virtual void UpdateCameraVectors() = 0;
+};
+
+class FlyingCameraState : public CameraState
+{
+public:
+	FlyingCameraState();
+	FlyingCameraState(Camera* inCamera);
+	~FlyingCameraState(){}
+	void SetContext(Camera* inCamera) override;
+	CameraState* SwapState()override;
+	void ProcessKeyboard(Camera_Movement direction, float deltaTime) override;
+	void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true) override;
+	void ProcessMouseScroll(float yoffset) override;
+	void UpdateCameraVectors() override;
+
+private:
+	Camera* camera;
+};
+
+class OrbitingCameraState : public CameraState
+{
+public:
+	OrbitingCameraState();
+	OrbitingCameraState(Camera* inCamera);
+	~OrbitingCameraState(){}
+	void SetContext(Camera* inCamera) override;
+	CameraState* SwapState() override;
+	void ProcessKeyboard(Camera_Movement direction, float deltaTime) override;
+	void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true) override;
+	void ProcessMouseScroll(float yoffset) override;
+	void UpdateCameraVectors() override;
+private:
+	Camera* camera;
+};
 
 class Camera : public Object
 {
 public:
+	friend CameraState;
+	friend FlyingCameraState;
+	friend OrbitingCameraState;
 	// camera attributes
 	glm::vec3 Position;
 	glm::vec3 Front;
@@ -55,8 +101,7 @@ public:
 	float Yaw;
 	float Pitch;
 
-	//asd
-	Camera_Control controlMode = ORBIT;
+	//orbiting camera variables
 	Camera_Orbit orbitState = DEFAULT;
 	glm::vec3 center = glm::vec3(0.0f);
 	float radius = 10.0f;
@@ -86,7 +131,8 @@ public:
 		farPlane(100.f),
 		screenWidth(2560),
 		screenHeight(1440),
-		lensType(PERSPECTIVE)
+		lensType(PERSPECTIVE),
+		camState(new OrbitingCameraState(this))
 	{
 		Position = position;
 		WorldUp = up;
@@ -106,7 +152,8 @@ public:
 		farPlane(farP),
 		screenWidth(scrWidth),
 		screenHeight(scrHeight),
-		lensType(projectionType)
+		lensType(projectionType),
+		camState(new OrbitingCameraState(this))
 	{
 		Position = position;
 		WorldUp = up;
@@ -126,7 +173,8 @@ public:
 		farPlane(farP),
 		screenWidth(scrWidth),
 		screenHeight(scrHeight),
-		lensType(projectionType)
+		lensType(projectionType),
+		camState(new OrbitingCameraState(this))
 	{
 		Position = glm::vec3(posX, posY, posZ);
 		WorldUp = glm::vec3(upX, upY, upZ);
@@ -136,6 +184,9 @@ public:
 		UpdateCameraVectors();
 		objectName = "Camera" + std::to_string(objectID);
 	}
+
+	void SetCameraState(CameraState* desiredState);
+	void SwapState();
 
 	// returns the view matrix calculated using euler angles and the lookAt matrix
 	glm::mat4 GetViewMatrix()
@@ -158,86 +209,23 @@ public:
 	// processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM( to abstract it from windowing system
 	void ProcessKeyboard(Camera_Movement direction, float deltaTime)
 	{
-		float velocity = MovementSpeed * deltaTime;
-		if (direction == FORWARD)
-			Position += Front * velocity;
-		if (direction == BACKWARD)
-			Position -= Front * velocity;
-		if (direction == LEFT)
-			Position -= Right * velocity;
-		if (direction == RIGHT)
-			Position += Right * velocity;
-
-		location = Position;
+		if(camState)
+		camState->ProcessKeyboard(direction, deltaTime);
 	}
 
 	// processes input received from a mouse input sytem. Expects the offset value in both the x and y direction
 	void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true)
 	{
-		//if FlyMode
-		if(controlMode == FLY){
-			xoffset *= MouseSensitivity;
-			yoffset *= MouseSensitivity;
-
-			Yaw += xoffset;
-			Pitch += yoffset;
-			// make sure that when pitch is out of bounds, screen doesn't get flipped
-			if (constrainPitch)
-			{
-				if (Pitch > 89.f)
-					Pitch = 89.f;
-				if (Pitch < -89.f)
-					Pitch = -89.f;
-			}
-		}
-
-		// if Orbit mode (DEFAULT)
-		if(controlMode == ORBIT){
-			if(orbitState == ORBITING){
-				xoffset *= MouseSensitivity/10;
-				yoffset *= MouseSensitivity/10;
-
-				rotateAzimuth(-xoffset);
-				rotatePolar(-yoffset);
-			}
-			if (orbitState == STRAFING) {
-				xoffset *= MouseSensitivity;
-				yoffset *= MouseSensitivity;
-				moveHorizontal(xoffset);
-				moveVertical(yoffset);
-			}
-		}
-
-		// update Front, Right and Up vectors using the updated Euler angles
-		UpdateCameraVectors();
+		if (camState)
+			camState->ProcessMouseMovement(xoffset, yoffset, constrainPitch);
 	}
 
 
 	// processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
 	void ProcessMouseScroll(float yoffset)
 	{
-		//if flymode
-		if (controlMode == FLY) {
-			FieldOfView -= (float)yoffset;
-			if (FieldOfView < 1.0f)
-				FieldOfView = 1.0f;
-			if (FieldOfView > 100.0f)
-				FieldOfView = 100.0f;
-			UpdateCameraProjectionMatrix();
-			if(lensType == PERSPECTIVE)
-				UpdateCameraVectors();
-		}
-
-		//if OrbitMode
-		if (controlMode == ORBIT){
-			radius -= yoffset;
-			if (radius < minRadius)
-				radius = minRadius;
-			if (radius > maxRadius)
-				radius = maxRadius;
-			if (lensType == PERSPECTIVE)
-				UpdateCameraVectors();
-		}
+		if (camState)
+			camState->ProcessMouseScroll(yoffset);
 	}
 
 	// Orthographic / Perspective
@@ -293,26 +281,9 @@ public:
 private:
 	void UpdateCameraVectors()
 	{
-		// if orbitingCamera
-		if(controlMode == ORBIT){
-			Position.x = center.x + radius * cos(polarAngle) * cos(azimuthAngle);
-			Position.y = center.y + radius * sin(polarAngle);
-			Position.z = center.z + radius * cos(polarAngle) * sin(azimuthAngle);
-			Front = glm::normalize(center - Position);
-		}
-
-		// if FlyCAMERA
-		if(controlMode == FLY){
-			// calculate the new front vector
-			glm::vec3 front;
-			front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-			front.y = sin(glm::radians(Pitch));
-			front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-			Front = glm::normalize(front);
-		}
-
-		// also re-calculate the right and up vetor
-		Right = glm::normalize(glm::cross(Front, WorldUp));	// Normalize the vectors, because their lenght gets closer to - the more you look up or down which results in slower movement
-		Up = glm::normalize(glm::cross(Right, Front));
+		if (camState)
+			camState->UpdateCameraVectors();
 	}
+
+	CameraState* camState;
 };

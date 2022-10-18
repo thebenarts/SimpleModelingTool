@@ -702,10 +702,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_GRAVE_ACCENT) == GLFW_PRESS)
-	{
-		ResourceManager::currentCamera->controlMode =
-			ResourceManager::currentCamera->controlMode == FLY ? ORBIT : FLY;
-	}
+		ResourceManager::currentCamera->SwapState();
 	// TODO: Replace SHIFT with different button (e.g. make it SHIFT + MiddleMouseBTN)
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
 		ResourceManager::currentCamera->orbitState = STRAFING;
