@@ -62,6 +62,8 @@ glm::vec3 rotation = glm::vec3(0.0f);
 glm::vec3 scale = glm::vec3(1.0f);
 
 glm::vec3 ogLocation = glm::vec3(0.0f);
+glm::vec3 ogRotation = glm::vec3(0.0f);
+glm::vec3 ogScale = glm::vec3(1.0f);
 
 glm::vec2 viewportSize;
 glm::vec2 viewportBounds[2];
@@ -393,11 +395,25 @@ int main(void)
 			if (currentObject)
 				currentObject->SetObjectScale(scale);
 		}
+		if (ImGui::IsItemActivated())
+			ogScale = currentObject->GetObjectScale();
+		if (ImGui::IsItemDeactivated())
+		{
+			if (ogScale != scale)
+				new ScaleCommand(currentObject, ogScale, scale);
+		}
 		// Fancy editor Rotation
 		if (ImGui::DragFloat3("Rotation", &rotation[0]))
 		{
 			if (currentObject)
 				currentObject->SetObjectRotation(rotation);
+		}
+		if (ImGui::IsItemActivated())
+			ogRotation = currentObject->GetObjectRotation();
+		if (ImGui::IsItemDeactivated())
+		{
+			if (ogRotation != rotation)
+				new RotateCommand(currentObject, ogRotation, rotation);
 		}
 
 		Light* currobj = dynamic_cast<Light*>(currentObject);

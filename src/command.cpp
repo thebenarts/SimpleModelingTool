@@ -74,6 +74,65 @@ void CreateCommand::Undo()
 	createdObject->RemoveID();
 }
 
+//------------------------------------------------------------------SCALE COMMAND--------------------------------------------------------------------------------
+ScaleCommand::ScaleCommand(Object* target, glm::vec3& ogScale, glm::vec3& newScale) :
+	targetObject(target),
+	desiredVector(newScale),
+	originalVector(ogScale)
+{
+	if (!targetObject)
+		return;
+
+	Execute();
+	ResourceManager::RegisterNewCommand(this);
+
+}
+
+void ScaleCommand::Execute()
+{
+	if (!targetObject)
+		return;
+
+	targetObject->SetObjectScale(desiredVector);
+}
+
+void ScaleCommand::Undo()
+{
+	if (!targetObject)
+		return;
+
+	targetObject->SetObjectScale(originalVector);
+}
+
+//------------------------------------------------------------------ROTATE COMMAND--------------------------------------------------------------------------------
+RotateCommand::RotateCommand(Object* target, glm::vec3& ogRot, glm::vec3& newRot) :
+	targetObject(target),
+	desiredVector(newRot),
+	originalVector(ogRot)
+{
+	if (!targetObject)
+		return;
+
+	Execute();
+	ResourceManager::RegisterNewCommand(this);
+}
+
+void RotateCommand::Execute()
+{
+	if (!targetObject)
+		return;
+
+	targetObject->SetObjectRotation(desiredVector);
+}
+
+void RotateCommand::Undo()
+{
+	if (!targetObject)
+		return;
+
+	targetObject->SetObjectRotation(originalVector);
+}
+
 //------------------------------------------------------------------REMOVE COMMAND--------------------------------------------------------------------------------
 
 RemoveCommand::RemoveCommand(Object* inObject) : objectToRemove(inObject)
