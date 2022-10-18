@@ -21,6 +21,15 @@ enum Camera_ProjectionMode
 	PERSPECTIVE,
 	ORTHOGRAPHIC
 };
+enum Camera_Control {
+	FLY,
+	ORBIT
+};
+enum Camera_Orbit {
+	ORBITING,		//if middlemouse held
+	STRAFING,		//if shift+mmb held
+	DEFAULT		
+};
 
 // Default camera values
 const float YAW = -90.f;
@@ -45,6 +54,16 @@ public:
 	// euler Angles 
 	float Yaw;
 	float Pitch;
+
+	//asd
+	Camera_Control controlMode = ORBIT;
+	Camera_Orbit orbitState = DEFAULT;
+	glm::vec3 center = glm::vec3(0.0f);
+	float radius = 10.0f;
+	float minRadius = 1.0f;
+	float maxRadius = 50.0f;
+	float azimuthAngle = 1.0f;
+	float polarAngle = 0.5f;
 
 	// camera options
 	float MovementSpeed;
@@ -155,36 +174,70 @@ public:
 	// processes input received from a mouse input sytem. Expects the offset value in both the x and y direction
 	void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true)
 	{
-		xoffset *= MouseSensitivity;
-		yoffset *= MouseSensitivity;
+		//if FlyMode
+		if(controlMode == FLY){
+			xoffset *= MouseSensitivity;
+			yoffset *= MouseSensitivity;
 
-		Yaw += xoffset;
-		Pitch += yoffset;
+			Yaw += xoffset;
+			Pitch += yoffset;
+			// make sure that when pitch is out of bounds, screen doesn't get flipped
+			if (constrainPitch)
+			{
+				if (Pitch > 89.f)
+					Pitch = 89.f;
+				if (Pitch < -89.f)
+					Pitch = -89.f;
+			}
+		}
 
-		// make sure that when pitch is out of bounds, screen doesn't get flipped
-		if (constrainPitch)
-		{
-			if (Pitch > 89.f)
-				Pitch = 89.f;
-			if (Pitch < -89.f)
-				Pitch = -89.f;
+		// if Orbit mode (DEFAULT)
+		if(controlMode == ORBIT){
+			if(orbitState == ORBITING){
+				xoffset *= MouseSensitivity/10;
+				yoffset *= MouseSensitivity/10;
+
+				rotateAzimuth(-xoffset);
+				rotatePolar(-yoffset);
+			}
+			if (orbitState == STRAFING) {
+				xoffset *= MouseSensitivity;
+				yoffset *= MouseSensitivity;
+				moveHorizontal(xoffset);
+				moveVertical(yoffset);
+			}
 		}
 
 		// update Front, Right and Up vectors using the updated Euler angles
 		UpdateCameraVectors();
 	}
 
+
 	// processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
 	void ProcessMouseScroll(float yoffset)
 	{
-		FieldOfView -= (float)yoffset;
-		if (FieldOfView < 1.0f)
-			FieldOfView = 1.0f;
-		if (FieldOfView > 100.0f)
-			FieldOfView = 100.0f;
+		//if flymode
+		if (controlMode == FLY) {
+			FieldOfView -= (float)yoffset;
+			if (FieldOfView < 1.0f)
+				FieldOfView = 1.0f;
+			if (FieldOfView > 100.0f)
+				FieldOfView = 100.0f;
+			UpdateCameraProjectionMatrix();
+			if(lensType == PERSPECTIVE)
+				UpdateCameraVectors();
+		}
 
-		if(lensType == PERSPECTIVE)
-		UpdateCameraProjectionMatrix();
+		//if OrbitMode
+		if (controlMode == ORBIT){
+			radius -= yoffset;
+			if (radius < minRadius)
+				radius = minRadius;
+			if (radius > maxRadius)
+				radius = maxRadius;
+			if (lensType == PERSPECTIVE)
+				UpdateCameraVectors();
+		}
 	}
 
 	// Orthographic / Perspective
@@ -198,15 +251,65 @@ public:
 	void SetObjectLocation(glm::vec3 newLocation) override;
 	void Select()override;
 	void DeSelect()override;
+
+	// ------------------------- Orbiting Camera ---------------------------------
+
+	// Rotate "horizontal"
+	void rotateAzimuth(float radians) {
+		azimuthAngle += radians;
+		const float fullCircle = 2.0f * glm::pi<float>();
+		azimuthAngle = fmodf(azimuthAngle, fullCircle);
+		if (azimuthAngle < 0.0f) {
+			azimuthAngle = fullCircle + azimuthAngle;
+		}
+	}
+	// Rotate "vertical"
+	void rotatePolar(float radians) {
+		polarAngle += radians;
+		const float polarCap = glm::pi<float>() / 2.0f - 0.001f;
+		if (polarAngle > polarCap)
+			polarAngle = polarCap;
+		if (polarAngle < -polarCap)
+			polarAngle = -polarCap;
+	}
+
+	// new center for Orbiting Camera
+	void setCenter(const glm::vec3 newCenter) {
+		center = newCenter;
+		UpdateCameraVectors();
+	}
+
+	// moves Orbiting camera horizontally moving the orbit center with it
+	void moveHorizontal(float distance) {
+		glm::vec3 strafeVector = glm::normalize(glm::cross(Front, Up));
+		center += strafeVector * distance;
+	}
+
+	// moves Orbiting camera vertically moving the orbit center with it
+	void moveVertical(float distance) {
+		center += Up * distance;
+	}
+	// -----------------------------------------------------------------------------
 private:
 	void UpdateCameraVectors()
 	{
-		// calculate the new front vector
-		glm::vec3 front;
-		front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-		front.y = sin(glm::radians(Pitch));
-		front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-		Front = glm::normalize(front);
+		// if orbitingCamera
+		if(controlMode == ORBIT){
+			Position.x = center.x + radius * cos(polarAngle) * cos(azimuthAngle);
+			Position.y = center.y + radius * sin(polarAngle);
+			Position.z = center.z + radius * cos(polarAngle) * sin(azimuthAngle);
+			Front = glm::normalize(center - Position);
+		}
+
+		// if FlyCAMERA
+		if(controlMode == FLY){
+			// calculate the new front vector
+			glm::vec3 front;
+			front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+			front.y = sin(glm::radians(Pitch));
+			front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+			Front = glm::normalize(front);
+		}
 
 		// also re-calculate the right and up vetor
 		Right = glm::normalize(glm::cross(Front, WorldUp));	// Normalize the vectors, because their lenght gets closer to - the more you look up or down which results in slower movement

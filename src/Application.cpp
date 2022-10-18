@@ -630,6 +630,13 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 			ResourceManager::SelectObject(selectedID);
 	}
+	if (bViewPortActive) 
+	{
+		if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS)
+			ResourceManager::currentCamera->orbitState = ORBITING;
+		if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_RELEASE)
+			ResourceManager::currentCamera->orbitState = DEFAULT;
+	}
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -659,8 +666,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
 
-	if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS){
 		ResourceManager::SelectNextObject();
+	}
+		
+		
 
 	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
 	{
@@ -674,6 +684,19 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	{
 		ResourceManager::HandleUndoCommand();
 	}
+
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_GRAVE_ACCENT) == GLFW_PRESS)
+	{
+		ResourceManager::currentCamera->controlMode =
+			ResourceManager::currentCamera->controlMode == FLY ? ORBIT : FLY;
+	}
+	// TODO: Replace SHIFT with different button (e.g. make it SHIFT + MiddleMouseBTN)
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+		ResourceManager::currentCamera->orbitState = STRAFING;
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
+		ResourceManager::currentCamera->orbitState = DEFAULT;
+	
+
 }
 
 void processInput(GLFWwindow* window)
