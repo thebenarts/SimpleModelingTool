@@ -31,7 +31,9 @@ class Object
 
 		virtual void AddID();
 		virtual void RemoveID();
-		
+		virtual void FreeID();
+
+		bool bRemoved;		// this should be fixed... technically speaking we could just use shared_ptrs for storing objects in commands.
 
 	protected:
 	glm::vec3 location;

@@ -10,6 +10,7 @@
 
 #include "renderer.h"
 #include "command.h"
+#include <memory>
 
 // Instantiate static variables
 
@@ -138,13 +139,39 @@ void ResourceManager::CreateCube()
 {
 	Cube* cObject = new Cube();
 	SelectObject(cObject->objectID);
-	new CreateCommand(cObject);
+	new CreateCommand(dynamic_cast<Object*>(cObject));
 }
+
+
 void ResourceManager::CreateLight()
 {
 	PointLight* light = new PointLight();
 	SelectObject(light->objectID);
-	new CreateCommand(light);
+	new CreateCommand(dynamic_cast<Object*>(light));
+}
+
+void ResourceManager::CreatePointLight()
+{
+	if (ResourceManager::freePointLightID.empty() && ResourceManager::pointLightID >= ResourceManager::pointLights.size())
+	{
+		std::cout << "ERROR::POINTLIGHT LIMIT REACHED (50)" << std::endl;
+		return;
+	}
+	PointLight* light = new PointLight();
+	SelectObject(light->objectID);
+	new CreateCommand(dynamic_cast<Object*>(light));
+}
+
+void ResourceManager::CreateSpotLight()
+{
+	if (ResourceManager::freeSpotLightID.empty() && ResourceManager::spotLightID >= ResourceManager::spotLights.size())
+	{
+		std::cout << "ERROR::SPOTLIGHT LIMIT REACHED (50)" << std::endl;
+		return;
+	}
+	SpotLight* light = new SpotLight();
+	SelectObject(light->objectID);
+	new CreateCommand(dynamic_cast<Object*>(light));
 }
 
 Camera* ResourceManager::CreateCamera()
@@ -361,27 +388,6 @@ unsigned int ResourceManager::GetandAddSpotLightID(SpotLight* light) {
 	ResourceManager::spotLights[lightID] = light;
 	return lightID;
 }
-void ResourceManager::CreatePointLight()
-{
-	if (ResourceManager::freePointLightID.empty() && ResourceManager::pointLightID >= ResourceManager::pointLights.size()) 
-	{
-		std::cout << "ERROR::POINTLIGHT LIMIT REACHED (50)" << std::endl;
-		return;
-	}
-	PointLight* light = new PointLight();
-	SelectObject(light->objectID);
-}
-
-void ResourceManager::CreateSpotLight()
-{
-	if (ResourceManager::freeSpotLightID.empty() && ResourceManager::spotLightID >= ResourceManager::spotLights.size())
-	{
-		std::cout << "ERROR::SPOTLIGHT LIMIT REACHED (50)" << std::endl;
-		return;
-	}
-	SpotLight* light = new SpotLight();
-	SelectObject(light->objectID);
-}
 
 void ResourceManager::SetViewportCamera(Camera* camera)
 {
@@ -397,7 +403,10 @@ void ResourceManager::SetViewportCamera(Camera* camera)
 void ResourceManager::AddUndo(ICommand* inCommand)
 {
 	if (ResourceManager::undoStack.size() == UNDO_STACK_MAXSIZE)
+	{
+		delete undoStack.front();
 		undoStack.pop_front();
+	}
 
 	undoStack.push_back(inCommand);
 }
@@ -494,4 +503,19 @@ void ResourceManager::RemovePointID(unsigned int inID)
 void ResourceManager::RemoveSpotID(unsigned int inID)
 {
 	ResourceManager::spotLights[inID] = nullptr;
+}
+
+void ResourceManager::FreeResourceID(unsigned int inID)
+{
+	ResourceManager::freeObjectID.push(inID);
+}
+
+void ResourceManager::FreePointID(unsigned int inID)
+{
+	ResourceManager::freePointLightID.push(inID);
+}
+
+void ResourceManager::FreeSpotID(unsigned int inID)
+{
+	ResourceManager::freeSpotLightID.push(inID);
 }

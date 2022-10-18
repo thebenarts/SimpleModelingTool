@@ -73,21 +73,11 @@ public:
 		originalVector = targetObject->GetObjectScale();
 	}
 
-	virtual void Execute() override
-	{
-		if (targetObject)
-		{
-			targetObject->SetObjectScale(desiredVector);
-		}
-	}
+	ScaleCommand(Object* target, glm::vec3& ogLocation, glm::vec3& newLocation);
 
-	virtual void Undo() override
-	{
-		if (targetObject)
-		{
-			targetObject->SetObjectScale(originalVector);
-		}
-	}
+	virtual void Execute() override;
+
+	virtual void Undo() override;
 
 
 private:
@@ -106,21 +96,11 @@ public:
 		originalVector = targetObject->GetObjectRotation();
 	}
 
-	virtual void Execute() override
-	{
-		if (targetObject)
-		{
-			targetObject->SetObjectRotation(desiredVector);
-		}
-	}
+	RotateCommand(Object* target, glm::vec3& ogRot, glm::vec3& newRot);
 
-	virtual void Undo() override
-	{
-		if (targetObject)
-		{
-			targetObject->SetObjectRotation(originalVector);
-		}
-	}
+	virtual void Execute() override;
+
+	virtual void Undo() override;
 
 
 private:
