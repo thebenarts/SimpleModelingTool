@@ -14,8 +14,8 @@ PointLight::PointLight(glm::vec3 amb, glm::vec3 diff, glm::vec3 spec)
 PointLight::~PointLight()
 {
 	Object::~Object();
-	ResourceManager::pointLights[objectID] = nullptr;
-	ResourceManager::freePointLightID.push(objectID);
+	ResourceManager::pointLights[pointLightID] = nullptr;
+	ResourceManager::freePointLightID.push(pointLightID);
 }
 
 void PointLight::AddID()

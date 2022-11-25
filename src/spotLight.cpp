@@ -8,3 +8,10 @@ SpotLight::SpotLight(glm::vec3 amb, glm::vec3 diff , glm::vec3 spec)
 	diffuse = diff;
 	specular = spec;
 }
+
+SpotLight::~SpotLight()
+{
+	Object::~Object();
+	ResourceManager::pointLights[objectID] = nullptr;
+	ResourceManager::freeSpotLightID.push(spotLightID);
+}
